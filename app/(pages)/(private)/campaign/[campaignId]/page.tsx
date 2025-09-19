@@ -127,6 +127,10 @@ export default function CampaignDetail() {
     setQuestions(prev => prev.filter(q => q.id !== questionId));
   }, []);
 
+  const handleDeleteTextSnippet = useCallback((snippetId: string) => {
+    setTextSnippets(prev => prev.filter(s => s.id !== snippetId));
+  }, []);
+
   const handleExportToPDF = useCallback(async () => {
     // PDF export logic would go here
     console.log('Exporting campaign to PDF...');
@@ -314,6 +318,7 @@ export default function CampaignDetail() {
           onDeleteQuestion={handleDeleteQuestion}
           onAddTextSnippet={handleAddTextSnippet}
           onUpdateTextSnippet={handleUpdateTextSnippet}
+          onDeleteTextSnippet={handleDeleteTextSnippet}
         />
       </main>
     </div>

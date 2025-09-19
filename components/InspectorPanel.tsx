@@ -24,6 +24,7 @@ interface InspectorPanelProps {
   onDeleteQuestion?: (questionId: string) => void;
   onAddTextSnippet: (snippet: TextSnippet) => void;
   onUpdateTextSnippet: (snippet: TextSnippet) => void;
+  onDeleteTextSnippet?: (snippetId: string) => void;
 }
 
 const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style: Partial<ContentContainerStyle>) => void }> = ({ style, onChange }) => {
@@ -50,7 +51,7 @@ const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style:
 };
 
 export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
-  const { selectedStep, onStyleChange, onAddContent, onSetBackground, onAddImageAsset, onRemoveImageAsset, onAddQuestion, onUpdateQuestion, onDeleteQuestion, onAddTextSnippet, onUpdateTextSnippet } = props;
+  const { selectedStep, onStyleChange, onAddContent, onSetBackground, onAddImageAsset, onRemoveImageAsset, onAddQuestion, onUpdateQuestion, onDeleteQuestion, onAddTextSnippet, onUpdateTextSnippet, onDeleteTextSnippet } = props;
   const [activeTab, setActiveTab] = useState('library');
   const [activeLibraryTab, setActiveLibraryTab] = useState('images');
 
@@ -65,7 +66,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
       case 'questions':
         return <QuestionBank questions={props.questions} onAddQuestion={onAddQuestion} onUpdateQuestion={onUpdateQuestion} onDeleteQuestion={onDeleteQuestion} onAddToStep={(id:any) => onAddContent({ type: 'QUESTION', id })} />;
       case 'text':
-        return <TextSnippetLibrary textSnippets={props.textSnippets} onAddTextSnippet={onAddTextSnippet} onUpdateTextSnippet={onUpdateTextSnippet} onAddToStep={(id:any) => onAddContent({ type: 'TEXT_SNIPPET', id })} />;
+        return <TextSnippetLibrary textSnippets={props.textSnippets} onAddTextSnippet={onAddTextSnippet} onUpdateTextSnippet={onUpdateTextSnippet} onDeleteTextSnippet={onDeleteTextSnippet} onAddToStep={(id:any) => onAddContent({ type: 'TEXT_SNIPPET', id })} />;
       default:
         return null;
     }
