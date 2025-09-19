@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { ScreenLoader } from '@/components/screen-loader';
 import { Plus, Trash2, FileText } from 'lucide-react';
 
 const CampaignListView: React.FC<{
@@ -179,11 +180,7 @@ export default function CampaignList() {
     }, [updateStatusMutation]);
 
     if (isLoading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-lg text-muted-foreground">Loading campaigns...</div>
-            </div>
-        );
+        return <ScreenLoader title="Loading campaigns" />;
     }
 
     if (error) {

@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
 import { useCampaignStore, createCampaign } from '@/stores/campaignStore';
 import { useCreateCampaign } from '@/hooks/useCampaigns';
+import { ScreenLoader } from '@/components/screen-loader';
 
 export default function CreateCampaign() {
   const router = useRouter();
@@ -57,7 +58,7 @@ export default function CreateCampaign() {
   // Initialize campaign if not exists
   if (!currentCampaign) {
     handleCreateCampaign();
-    return <div>Loading...</div>;
+    return <ScreenLoader title="Loading campaigns" />;
   }
 
   return (
