@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Edit, Play, Pause } from 'lucide-react';
-import { useCampaign } from '@/lib/hooks/useCampaigns';
+import { useCampaign } from '@/hooks/useCampaigns';
 
 export default function CampaignDetail() {
   const params = useParams();

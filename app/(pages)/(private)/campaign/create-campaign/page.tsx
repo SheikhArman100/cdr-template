@@ -10,8 +10,8 @@ import { Label } from '@/components/ui/label';
 
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
-import { useCampaignStore, createCampaign } from '@/lib/stores/campaignStore';
-import { useCreateCampaign } from '@/lib/hooks/useCampaigns';
+import { useCampaignStore, createCampaign } from '@/stores/campaignStore';
+import { useCreateCampaign } from '@/hooks/useCampaigns';
 
 export default function CreateCampaign() {
   const router = useRouter();

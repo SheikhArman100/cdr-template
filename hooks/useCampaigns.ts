@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { campaignApi } from '@/lib/api/campaigns';
+import { campaignApi } from '@/api/campaigns';
 import { Campaign } from '@/types';
 
 // Query keys

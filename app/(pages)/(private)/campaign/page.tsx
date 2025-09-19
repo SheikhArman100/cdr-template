@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Campaign } from '@/types';
-import { useCampaigns, useDeleteCampaign, useUpdateCampaignStatus } from '@/lib/hooks/useCampaigns';
+import { useCampaigns, useDeleteCampaign, useUpdateCampaignStatus } from '@/hooks/useCampaigns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
