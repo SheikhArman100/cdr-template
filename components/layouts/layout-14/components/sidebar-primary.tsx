@@ -172,7 +172,7 @@ export function SidebarPrimary() {
         <DropdownMenu>
           <DropdownMenuTrigger className="cursor-pointer mb-2.5">
             <Avatar className="size-7">
-              <AvatarImage src={toAbsoluteUrl('/media/avatars/300-2.png')} alt="@reui" />
+              <AvatarImage src={toAbsoluteUrl('/media/avatar.png')} alt="@reui" />
               <AvatarFallback>CH</AvatarFallback>
               <AvatarIndicator className="-end-2 -top-2">
                 <AvatarStatus variant="online" className="size-2.5" />
@@ -183,7 +183,7 @@ export function SidebarPrimary() {
             {/* User Information Section */}
             <div className="flex items-center gap-3 px-3 py-2">
               <Avatar>
-                <AvatarImage src={toAbsoluteUrl('/media/avatars/300-2.png')} alt="@reui" />
+                <AvatarImage src={toAbsoluteUrl('/media/avatar.png')} alt="@reui" />
                 <AvatarFallback>CH</AvatarFallback>
                 <AvatarIndicator className="-end-1.5 -top-1.5">
                   <AvatarStatus variant="online" className="size-2.5" />

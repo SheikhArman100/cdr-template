@@ -16,6 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 
 interface Team {
   icon: React.ElementType;
@@ -70,15 +71,19 @@ export function HeaderLogo() {
         {/* Logo */}
         <div className="flex items-center justify-center shrink-0 border-e border-border w-(--sidebar-collapsed-width) h-(--header-height) bg-muted">
           <Link href="/layout-14">
-            <img
-              src={toAbsoluteUrl('/media/app/mini-logo-gray.svg')}
-              className="dark:hidden min-h-[30px]"
+            <Image
+              src={toAbsoluteUrl('/media/mini-logo-gray.svg')}
+              className="dark:hidden h-[30px]"
               alt="Thunder AI Logo"
+              width={100}
+              height={30}
             />
-            <img
-              src={toAbsoluteUrl('/media/app/mini-logo-gray-dark.svg')}
-              className="hidden dark:block min-h-[30px]"
+            <Image
+              src={toAbsoluteUrl('/media/mini-logo-gray-dark.svg')}
+              className="hidden dark:block h-[30px]"
               alt="Thunder AI Logo"
+              width={100}
+              height={30}
             />
           </Link>
         </div>
