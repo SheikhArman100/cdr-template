@@ -1,4 +1,5 @@
 import { Layout14 } from '@/components/layouts/layout-14';
+import RootProvider from '@/provider/root-provider';
 
 export default function PrivateLayout({
   children,
@@ -6,8 +7,8 @@ export default function PrivateLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Layout14>
+    <RootProvider>
       {children}
-    </Layout14>
+    </RootProvider>
   );
 }
