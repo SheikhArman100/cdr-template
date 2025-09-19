@@ -15,8 +15,8 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Metronic',
-    default: 'Metronic', // a default is required when creating a template
+    template: 'CDR Dashboard',
+    default: 'CDR', // a default is required when creating a template
   },
 };
 
