@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { campaignApi } from '@/api/campaigns';
-import { Campaign } from '@/types';
+import { Campaign } from '@/types/campaign.types';
 
 // Query keys
 export const campaignKeys = {

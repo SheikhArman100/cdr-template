@@ -1,204 +1,350 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
-import { useCampaignStore, createCampaign } from '@/stores/campaignStore';
+import { ImageAsset, Question, QuestionType, TextSnippet } from '@/types/campaign.types';
+import { ArrowLeftIcon, DocumentTextIcon, PencilIcon, CheckIcon } from '@/components/icons';
+import { Sidebar } from '@/components/Sidebar';
+import { Canvas } from '@/components/Canvas';
+import { InspectorPanel } from '@/components/InspectorPanel';
+import { useCampaignStore } from '@/stores/campaignStore';
 import { useCreateCampaign } from '@/hooks/useCampaigns';
 import { ScreenLoader } from '@/components/screen-loader';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+
+const initialImageAssets: ImageAsset[] = [
+  { id: 'img-1', name: 'Mountain View', url: 'https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=2070&auto=format&fit=crop' },
+  { id: 'img-2', name: 'Desert Dunes', url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?q=80&w=2070&auto=format&fit=crop' },
+];
+
+const initialQuestions: Question[] = [
+  { id: 'q-1', text: 'What is your name?', type: QuestionType.TEXT, placeholder: 'Enter your full name' },
+  { id: 'q-2', text: 'Which topic are you interested in?', type: QuestionType.DROPDOWN, options: ['Technology', 'Health', 'Science'] },
+  { id: 'q-3', text: 'What is your date of birth?', type: QuestionType.DATE },
+];
+
+const initialTextSnippets: TextSnippet[] = [
+  { id: 'ts-1', name: 'Welcome Message', text: 'Welcome to our campaign!' },
+  { id: 'ts-2', name: 'Thank You', text: 'Thank you for your submission.' },
+];
 
 export default function CreateCampaign() {
   const router = useRouter();
-  const { currentCampaign, updateCampaignName, addStep, updateStepName, deleteStep } = useCampaignStore();
-  const createCampaignMutation = useCreateCampaign();
+  const {
+    currentCampaign,
+    setCurrentCampaign,
+    addStep,
+    deleteStep,
+    updateStepName,
+    updateStyle,
+    setBackground,
+    addContent,
+    removeContent,
+    reorderContent,
+    resizeContent,
+    draftCampaigns,
+    saveDraftCampaign,
+  } = useCampaignStore();
 
-  const [campaignName, setCampaignName] = useState(currentCampaign?.name || 'New Campaign');
+  const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [showDraftRecovery, setShowDraftRecovery] = useState(false);
 
-  const handleCreateCampaign = () => {
-    const newCampaign = createCampaign();
-    setCampaignName(newCampaign.name);
-  };
+  // Global assets (could also be moved to store if needed)
+  const [imageAssets, setImageAssets] = useState<ImageAsset[]>(initialImageAssets);
+  const [questions, setQuestions] = useState<Question[]>(initialQuestions);
+  const [textSnippets, setTextSnippets] = useState<TextSnippet[]>(initialTextSnippets);
 
-  const handleSaveCampaign = () => {
-    if (!currentCampaign) return;
+  // Check for existing drafts on mount
+  useEffect(() => {
+    if (draftCampaigns.length > 0 && !currentCampaign) {
+      setShowDraftRecovery(true);
+    } else if (!currentCampaign) {
+      // Create new campaign if no drafts
+      const newCampaign = {
+        id: `campaign-${Date.now()}`,
+        name: 'New Campaign',
+        userId: '123',
+        status: 'inactive' as const,
+        lastModified: new Date().toISOString(),
+        steps: [
+          {
+            id: `step-${Date.now()}`,
+            name: 'Welcome Screen',
+            backgroundAssetId: null,
+            contentContainerStyle: {
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              borderColor: '#000000',
+              borderWidth: 2,
+              textColor: '#000000',
+            },
+            contentItems: [],
+            logic: [],
+          },
+        ],
+      };
+      setCurrentCampaign(newCampaign);
+    }
+  }, [draftCampaigns, currentCampaign, setCurrentCampaign]);
 
-    // Update the campaign name
-    updateCampaignName(campaignName);
+  // Set selected step when campaign changes
+  useEffect(() => {
+    if (currentCampaign && !selectedStepId) {
+      setSelectedStepId(currentCampaign.steps[0]?.id || null);
+    }
+  }, [currentCampaign, selectedStepId]);
 
-    // Here you would typically save to the API
-    createCampaignMutation.mutate({
-      ...currentCampaign,
-      name: campaignName,
-    }, {
-      onSuccess: () => {
-        router.push('/campaign');
-      }
-    });
-  };
+  // Auto-save drafts
+  useEffect(() => {
+    if (currentCampaign) {
+      const timeoutId = setTimeout(() => {
+        saveDraftCampaign(currentCampaign);
+      }, 1000);
 
-  const handleAddStep = () => {
-    addStep();
-  };
+      return () => clearTimeout(timeoutId);
+    }
+  }, [currentCampaign, saveDraftCampaign]);
 
-  const handleStepNameChange = (stepId: string, name: string) => {
-    updateStepName(stepId, name);
-  };
+  const selectedStep = currentCampaign?.steps.find(step => step.id === selectedStepId) || undefined;
 
-  const handleDeleteStep = (stepId: string) => {
-    deleteStep(stepId);
-  };
+  const handleBackToList = useCallback(() => {
+    router.push('/campaign');
+  }, [router]);
 
-  // Initialize campaign if not exists
-  if (!currentCampaign) {
-    handleCreateCampaign();
-    return <ScreenLoader title="Loading campaigns" />;
-  }
+  const handleSelectStep = useCallback((id: string) => {
+    setSelectedStepId(id);
+  }, []);
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/campaign">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Campaigns
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Create Campaign</h1>
-            <p className="text-muted-foreground">Build your marketing campaign flow</p>
+  const handleAddImageAsset = useCallback((asset: ImageAsset) => {
+    setImageAssets(prev => [...prev, asset]);
+  }, []);
+
+  const handleAddQuestion = useCallback((question: Question) => {
+    setQuestions(prev => [...prev, question]);
+  }, []);
+
+  const handleUpdateQuestion = useCallback((updatedQuestion: Question) => {
+    setQuestions(prev => prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
+  }, []);
+
+  const handleAddTextSnippet = useCallback((snippet: TextSnippet) => {
+    setTextSnippets(prev => [...prev, snippet]);
+  }, []);
+
+  const handleUpdateTextSnippet = useCallback((updatedSnippet: TextSnippet) => {
+    setTextSnippets(prev => prev.map(s => s.id === updatedSnippet.id ? updatedSnippet : s));
+  }, []);
+
+  const handleExportToPDF = useCallback(async () => {
+    // PDF export logic would go here
+    console.log('Exporting campaign to PDF...');
+  }, []);
+
+  // Wrapper functions for Canvas and InspectorPanel
+  const handleRemoveContent = useCallback((index: number) => {
+    if (selectedStepId) removeContent(selectedStepId, index);
+  }, [selectedStepId, removeContent]);
+
+  const handleReorderContent = useCallback((dragIndex: number, hoverIndex: number) => {
+    if (selectedStepId) reorderContent(selectedStepId, dragIndex, hoverIndex);
+  }, [selectedStepId, reorderContent]);
+
+  const handleResizeContent = useCallback((index: number, size: { width: number; height: number }) => {
+    if (selectedStepId) resizeContent(selectedStepId, index, size);
+  }, [selectedStepId, resizeContent]);
+
+  const handleStyleChange = useCallback((style: any) => {
+    if (selectedStepId) updateStyle(selectedStepId, style);
+  }, [selectedStepId, updateStyle]);
+
+  const handleAddContent = useCallback((item: any) => {
+    if (selectedStepId) addContent(selectedStepId, item);
+  }, [selectedStepId, addContent]);
+
+  const handleSetBackground = useCallback((assetId: string) => {
+    if (selectedStepId) setBackground(selectedStepId, assetId);
+  }, [selectedStepId, setBackground]);
+
+  const handleCampaignNameChange = useCallback((newName: string) => {
+    if (currentCampaign) {
+      setCurrentCampaign({
+        ...currentCampaign,
+        name: newName,
+        lastModified: new Date().toISOString(),
+      });
+    }
+  }, [currentCampaign, setCurrentCampaign]);
+
+
+
+  // Draft recovery UI
+  if (showDraftRecovery) {
+    return (
+      <div className="flex flex-col flex-1 h-[calc(100vh-var(--header-height))] bg-background">
+        <div className="flex items-center justify-center h-full">
+          <div className="bg-card p-6 rounded-lg shadow-lg max-w-md w-full mx-4 border border-border">
+            <h2 className="text-xl font-bold text-foreground mb-3">Resume Your Work</h2>
+            <p className="text-muted-foreground mb-4">
+              We found an unfinished campaign draft. Would you like to continue working on it?
+            </p>
+            <div className="space-y-2">
+              <Button
+                onClick={() => {
+                  const latestDraft = draftCampaigns[draftCampaigns.length - 1];
+                  setCurrentCampaign(latestDraft);
+                  setShowDraftRecovery(false);
+                }}
+                className="w-full"
+                variant="primary"
+              >
+                Resume Draft
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowDraftRecovery(false);
+                  // This will trigger the useEffect to create a new campaign
+                  setCurrentCampaign(null);
+                }}
+                className="w-full"
+                variant="secondary"
+              >
+                Start New Campaign
+              </Button>
+            </div>
           </div>
         </div>
-        <Button onClick={handleSaveCampaign} disabled={createCampaignMutation.isPending}>
-          <Save className="w-4 h-4 mr-2" />
-          {createCampaignMutation.isPending ? 'Saving...' : 'Save Campaign'}
+      </div>
+    );
+  }
+
+  if (!currentCampaign) {
+    return (
+      <ScreenLoader title='Loading template'/>
+    );
+  }
+
+  // Editable Campaign Name Component
+  const EditableCampaignName: React.FC<{ name: string; onNameChange: (name: string) => void }> = ({ name, onNameChange }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [editName, setEditName] = useState(name);
+
+    const handleSave = () => {
+      if (editName.trim()) {
+        onNameChange(editName.trim());
+      }
+      setIsEditing(false);
+    };
+
+    const handleCancel = () => {
+      setEditName(name);
+      setIsEditing(false);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleSave();
+      } else if (e.key === 'Escape') {
+        handleCancel();
+      }
+    };
+
+    if (isEditing) {
+      return (
+        <div className="flex items-center gap-2">
+          <Input
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            className="text-xl font-bold text-foreground bg-background border-border"
+            autoFocus
+          />
+          <Button
+            onClick={handleSave}
+            variant="ghost"
+            size="icon"
+            className="text-primary hover:text-primary/80"
+          >
+            <CheckIcon className="w-5 h-5" />
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setIsEditing(true)}>
+        <h1 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+          {name}
+        </h1>
+        <PencilIcon className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex flex-col flex-1 h-[calc(100vh-var(--header-height)-40px)] shadow-sm  rounded-lg">
+      <header className="bg-card border-b border-border p-2 flex items-center justify-between z-30  shrink-0">
+        <div className="flex items-center">
+          <Button
+            onClick={handleBackToList}
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-primary"
+          >
+            <ArrowLeftIcon className="w-5 h-5 mr-2" />
+            Back to Campaigns
+          </Button>
+          <div className="w-px h-6 bg-border mx-2"></div>
+          <div>
+            <EditableCampaignName name={currentCampaign.name} onNameChange={handleCampaignNameChange} />
+            <p className="text-xs text-muted-foreground">Creating New Campaign</p>
+          </div>
+        </div>
+        <Button
+          onClick={handleExportToPDF}
+          disabled={isExporting}
+          variant="primary"
+          size="sm"
+          className="disabled:bg-muted"
+        >
+          <DocumentTextIcon className="w-5 h-5 mr-2" />
+          {isExporting ? 'Exporting...' : 'Export to PDF'}
         </Button>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Campaign Details</CardTitle>
-          <CardDescription>Configure the basic information for your campaign</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="campaign-name">Campaign Name</Label>
-            <Input
-              id="campaign-name"
-              value={campaignName}
-              onChange={(e) => setCampaignName(e.target.value)}
-              placeholder="Enter campaign name"
-            />
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge variant="secondary">Status: Draft</Badge>
-            <Badge variant="outline">{currentCampaign.steps.length} Steps</Badge>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Campaign Steps</CardTitle>
-              <CardDescription>Define the flow of your campaign</CardDescription>
-            </div>
-            <Button onClick={handleAddStep} size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Step
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {currentCampaign.steps.map((step, index) => (
-              <Card key={step.id} className="border-l-4 border-l-primary">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <Input
-                          value={step.name}
-                          onChange={(e) => handleStepNameChange(step.id, e.target.value)}
-                          className="text-lg font-medium border-none p-0 h-auto focus-visible:ring-0"
-                        />
-                        <p className="text-sm text-muted-foreground">Step {index + 1}</p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteStep(step.id)}
-                      disabled={currentCampaign.steps.length <= 1}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Content Items</Label>
-                      <div className="mt-2 p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg text-center text-muted-foreground">
-                        {step.contentItems.length === 0 ? (
-                          <p>Drag content items here or click to add</p>
-                        ) : (
-                          <div className="space-y-2">
-                            {step.contentItems.map((item, itemIndex) => (
-                              <div key={itemIndex} className="p-2 bg-muted rounded text-sm">
-                                {item.type === 'TEXT_SNIPPET' ? 'Text Snippet' : 'Question'}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Background Color</Label>
-                        <Input
-                          value={step.contentContainerStyle.backgroundColor}
-                          onChange={(e) => {
-                            // Update style logic would go here
-                          }}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label>Text Color</Label>
-                        <Input
-                          value={step.contentContainerStyle.textColor}
-                          onChange={(e) => {
-                            // Update style logic would go here
-                          }}
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="text-center text-muted-foreground">
-        <p>Visual builder canvas and inspector panel coming soon...</p>
-        <p className="text-sm mt-1">This is a basic form-based editor for campaign creation.</p>
-      </div>
+      </header>
+      <main className="flex flex-1 min-h-0">
+        <Sidebar
+          steps={currentCampaign.steps}
+          selectedStepId={selectedStepId}
+          onSelectStep={handleSelectStep}
+          onAddStep={addStep}
+          onDeleteStep={deleteStep}
+          onUpdateStepName={updateStepName}
+        />
+        <Canvas
+          step={selectedStep}
+          imageAssets={imageAssets}
+          questions={questions}
+          textSnippets={textSnippets}
+          onRemoveContent={handleRemoveContent}
+          onReorderContent={handleReorderContent}
+          onResizeContent={handleResizeContent}
+        />
+        <InspectorPanel
+          selectedStep={selectedStep}
+          imageAssets={imageAssets}
+          questions={questions}
+          textSnippets={textSnippets}
+          onStyleChange={handleStyleChange}
+          onAddContent={handleAddContent}
+          onSetBackground={handleSetBackground}
+          onAddImageAsset={handleAddImageAsset}
+          onAddQuestion={handleAddQuestion}
+          onUpdateQuestion={handleUpdateQuestion}
+          onAddTextSnippet={handleAddTextSnippet}
+          onUpdateTextSnippet={handleUpdateTextSnippet}
+        />
+      </main>
     </div>
   );
 }

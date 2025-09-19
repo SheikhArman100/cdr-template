@@ -1,4 +1,4 @@
-import { Campaign } from '@/types';
+import { Campaign } from '@/types/campaign.types';
 
 // Mock API functions - replace with actual API calls
 export const campaignApi = {
@@ -11,6 +11,7 @@ export const campaignApi = {
       {
         id: 'campaign-1',
         name: 'Welcome Journey',
+        userId: '123',
         steps: [
           {
             id: 'step-1',
@@ -50,6 +51,7 @@ export const campaignApi = {
       {
         id: 'campaign-2',
         name: 'New User Onboarding',
+        userId: '123',
         steps: [
           {
             id: 'c2-step-1',

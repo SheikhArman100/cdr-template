@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Campaign, Step, ContentItem, ContentContainerStyle } from '@/types';
+import { Campaign, Step, ContentItem, ContentContainerStyle } from '@/types/campaign.types';
 
 interface CampaignState {
   // Current campaign being edited
@@ -35,6 +35,7 @@ interface CampaignState {
 const createNewCampaign = (): Campaign => ({
   id: `campaign-${Date.now()}`,
   name: 'New Campaign',
+  userId: '123',
   status: 'inactive',
   lastModified: new Date().toISOString(),
   steps: [
@@ -294,6 +295,7 @@ export const loadCampaignForEditing = (campaignId: string) => {
   const mockCampaign: Campaign = {
     id: campaignId,
     name: 'Loaded Campaign',
+    userId: '123',
     status: 'active',
     lastModified: new Date().toISOString(),
     steps: [

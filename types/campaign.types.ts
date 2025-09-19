@@ -74,6 +74,7 @@ export interface Step {
 export interface Campaign {
   id: string;
   name: string;
+  userId: string;
   steps: Step[];
   lastModified: string;
   status: 'active' | 'inactive';
