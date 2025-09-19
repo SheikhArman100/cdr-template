@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Layout14 } from '@/components/layouts/layout-14';
+import { Layout } from '@/components/layout';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -22,7 +22,7 @@ const queryClient = new QueryClient({
 export default function RootProvider({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <Layout14>{children}</Layout14>
+      <Layout>{children}</Layout>
     </QueryClientProvider>
   );
 }
