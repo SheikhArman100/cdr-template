@@ -3,6 +3,10 @@ import type { Step, ImageAsset, Question, TextSnippet, ContentContainerStyle, Co
 import { ImageLibrary } from './ImageLibrary';
 import { QuestionBank } from './QuestionBank';
 import { TextSnippetLibrary } from './TextSnippetLibrary';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 
 interface InspectorPanelProps {
@@ -23,21 +27,21 @@ interface InspectorPanelProps {
 const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style: Partial<ContentContainerStyle>) => void }> = ({ style, onChange }) => {
     return (
         <div className="space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Background Color</label>
-                <input type="color" value={style.backgroundColor.startsWith('rgba') ? '#ffffff' : style.backgroundColor} onChange={(e) => onChange({ backgroundColor: e.target.value })} className="w-full h-8 p-0 border-none cursor-pointer" />
+            <div className="space-y-2">
+                <Label htmlFor="background-color">Background Color</Label>
+                <Input id="background-color" type="color" value={style.backgroundColor.startsWith('rgba') ? '#ffffff' : style.backgroundColor} onChange={(e) => onChange({ backgroundColor: e.target.value })} />
             </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Border Color</label>
-                <input type="color" value={style.borderColor} onChange={(e) => onChange({ borderColor: e.target.value })} className="w-full h-8 p-0 border-none cursor-pointer" />
+            <div className="space-y-2">
+                <Label htmlFor="border-color">Border Color</Label>
+                <Input id="border-color" type="color" value={style.borderColor} onChange={(e) => onChange({ borderColor: e.target.value })} />
             </div>
-             <div>
-                <label className="block text-sm font-medium text-gray-700">Border Thickness ({style.borderWidth}px)</label>
-                <input type="range" min="0" max="20" value={style.borderWidth} onChange={(e) => onChange({ borderWidth: parseInt(e.target.value) })} className="w-full" />
+            <div className="space-y-2">
+                <Label htmlFor="border-width">Border Thickness ({style.borderWidth}px)</Label>
+                <Input id="border-width" type="range" min="0" max="20" value={style.borderWidth} onChange={(e) => onChange({ borderWidth: parseInt(e.target.value) })} />
             </div>
-             <div>
-                <label className="block text-sm font-medium text-gray-700">Text Color</label>
-                <input type="color" value={style.textColor} onChange={(e) => onChange({ textColor: e.target.value })} className="w-full h-8 p-0 border-none cursor-pointer" />
+            <div className="space-y-2">
+                <Label htmlFor="text-color">Text Color</Label>
+                <Input id="text-color" type="color" value={style.textColor} onChange={(e) => onChange({ textColor: e.target.value })} />
             </div>
         </div>
     );
@@ -67,39 +71,35 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
 
   return (
     <aside className="w-96 bg-white border-l border-gray-200 flex flex-col z-10">
-      <div className="border-b border-gray-200">
-        <nav className="flex -mb-px">
-          <button onClick={() => setActiveTab('library')} className={`w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm ${activeTab === 'library' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
-            Library
-          </button>
-          <button onClick={() => setActiveTab('inspector')} className={`w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm ${activeTab === 'inspector' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
-            Inspector
-          </button>
-        </nav>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-2" variant="line">
+          <TabsTrigger value="library">Library</TabsTrigger>
+          <TabsTrigger value="inspector">Inspector</TabsTrigger>
+        </TabsList>
 
-      <div className="flex-grow overflow-y-auto">
-        {activeTab === 'library' && (
-            <div>
-                 <div className="border-b border-gray-200">
-                    <nav className="flex justify-around -mb-px">
-                         <button onClick={() => setActiveLibraryTab('images')} className={`flex-1 py-3 px-1 text-center border-b-2 font-medium text-xs ${activeLibraryTab === 'images' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200'}`}>Images</button>
-                         <button onClick={() => setActiveLibraryTab('questions')} className={`flex-1 py-3 px-1 text-center border-b-2 font-medium text-xs ${activeLibraryTab === 'questions' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200'}`}>Questions</button>
-                         <button onClick={() => setActiveLibraryTab('text')} className={`flex-1 py-3 px-1 text-center border-b-2 font-medium text-xs ${activeLibraryTab === 'text' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200'}`}>Text Snippets</button>
-                    </nav>
-                </div>
-                <div className="p-4">{renderLibraryContent()}</div>
-            </div>
-        )}
-        {activeTab === 'inspector' && (
-            <div className="p-6 space-y-6">
-                <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Content Box Styles</h3>
-                    <StyleInspector style={selectedStep.contentContainerStyle} onChange={onStyleChange} />
-                </div>
-            </div>
-        )}
-      </div>
+        <div className="flex-grow overflow-y-auto">
+          <TabsContent value="library" className="mt-0">
+            <Tabs value={activeLibraryTab} onValueChange={setActiveLibraryTab}>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="images">Images</TabsTrigger>
+                <TabsTrigger value="questions">Questions</TabsTrigger>
+                <TabsTrigger value="text">Text Snippets</TabsTrigger>
+              </TabsList>
+              <div className="p-4">{renderLibraryContent()}</div>
+            </Tabs>
+          </TabsContent>
+          <TabsContent value="inspector" className="mt-0">
+            <Card className="m-4">
+              <CardHeader>
+                <CardTitle>Content Box Styles</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <StyleInspector style={selectedStep.contentContainerStyle} onChange={onStyleChange} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </div>
+      </Tabs>
     </aside>
   );
 };

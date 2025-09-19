@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import type { TextSnippet } from '../types/campaign.types';
 import { PlusIcon, PencilIcon, CheckIcon } from './icons';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 interface TextSnippetLibraryProps {
   textSnippets: TextSnippet[];
@@ -30,44 +35,42 @@ const TextSnippetForm: React.FC<{
   };
 
   return (
-    <div className="p-4 border border-gray-200 rounded-lg bg-gray-50 space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Snippet Name</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Enter snippet name"
-        />
-      </div>
+    <Card>
+      <CardContent className="pt-6">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="snippet-name">Snippet Name</Label>
+            <Input
+              id="snippet-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter snippet name"
+            />
+          </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Snippet Text</label>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          rows={4}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Enter the text content for this snippet"
-        />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="snippet-text">Snippet Text</Label>
+            <Textarea
+              id="snippet-text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={4}
+              placeholder="Enter the text content for this snippet"
+            />
+          </div>
 
-      <div className="flex justify-end space-x-2">
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleSave}
-          className="px-4 py-2 text-sm text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
-        >
-          {snippet ? 'Update' : 'Add'} Snippet
-        </button>
-      </div>
-    </div>
+          <div className="flex justify-end space-x-2">
+            <Button onClick={onCancel} variant="outline">
+              Cancel
+            </Button>
+            <Button onClick={handleSave} variant="primary">
+              {snippet ? 'Update' : 'Add'} Snippet
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -94,13 +97,10 @@ export const TextSnippetLibrary: React.FC<TextSnippetLibraryProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">Text Snippets</h3>
-        <button
-          onClick={() => setIsAdding(true)}
-          className="flex items-center px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-        >
+        <Button onClick={() => setIsAdding(true)} variant="primary">
           <PlusIcon className="w-4 h-4 mr-2" />
           Add Snippet
-        </button>
+        </Button>
       </div>
 
       {isAdding && (
@@ -132,19 +132,21 @@ export const TextSnippetLibrary: React.FC<TextSnippetLibraryProps> = ({
                 </div>
               </div>
               <div className="flex items-center space-x-2 ml-4">
-                <button
+                <Button
                   onClick={() => onAddToStep(snippet.id)}
-                  className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition"
+                  variant="primary"
+                  size="sm"
                 >
                   Add to Step
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setEditingSnippet(snippet)}
-                  className="p-1 text-gray-400 hover:text-blue-600 transition"
+                  variant="ghost"
+                  size="icon"
                   title="Edit snippet"
                 >
                   <PencilIcon className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             </div>
           </div>

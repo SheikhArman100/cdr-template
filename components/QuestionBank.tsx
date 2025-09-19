@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import type { Question } from '../types/campaign.types';
 import { QuestionType } from '../types/campaign.types';
 import { PlusIcon, PencilIcon, TrashIcon, CheckIcon } from './icons';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from './ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 interface QuestionBankProps {
   questions: Question[];
@@ -66,92 +72,89 @@ const QuestionForm: React.FC<{
   };
 
   return (
-    <div className="p-4 border border-gray-200 rounded-lg bg-gray-50 space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Question Text</label>
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Enter your question"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Question Type</label>
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value as QuestionType)}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value={QuestionType.TEXT}>Text Input</option>
-          <option value={QuestionType.DROPDOWN}>Dropdown</option>
-          <option value={QuestionType.DATE}>Date Picker</option>
-        </select>
-      </div>
-
-      {type === QuestionType.TEXT && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Placeholder Text</label>
-          <input
-            type="text"
-            value={placeholder}
-            onChange={(e) => setPlaceholder(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Enter placeholder text"
-          />
-        </div>
-      )}
-
-      {type === QuestionType.DROPDOWN && (
-        <div>
-          <div className="flex items-center justify-between">
-            <label className="block text-sm font-medium text-gray-700">Options</label>
-            <button
-              onClick={addOption}
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              + Add Option
-            </button>
+    <Card>
+      <CardContent className="pt-6">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="question-text">Question Text</Label>
+            <Input
+              id="question-text"
+              type="text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Enter your question"
+            />
           </div>
-          <div className="mt-2 space-y-2">
-            {options.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <input
-                  type="text"
-                  value={option}
-                  onChange={(e) => updateOption(index, e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder={`Option ${index + 1}`}
-                />
-                <button
-                  onClick={() => removeOption(index)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <TrashIcon className="w-4 h-4" />
-                </button>
+
+          <div className="space-y-2">
+            <Label htmlFor="question-type">Question Type</Label>
+            <Select value={type} onValueChange={(value) => setType(value as QuestionType)}>
+              <SelectTrigger id="question-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={QuestionType.TEXT}>Text Input</SelectItem>
+                <SelectItem value={QuestionType.DROPDOWN}>Dropdown</SelectItem>
+                <SelectItem value={QuestionType.DATE}>Date Picker</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {type === QuestionType.TEXT && (
+            <div className="space-y-2">
+              <Label htmlFor="placeholder-text">Placeholder Text</Label>
+              <Input
+                id="placeholder-text"
+                type="text"
+                value={placeholder}
+                onChange={(e) => setPlaceholder(e.target.value)}
+                placeholder="Enter placeholder text"
+              />
+            </div>
+          )}
+
+          {type === QuestionType.DROPDOWN && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Options</Label>
+                <Button onClick={addOption} variant="ghost" size="sm">
+                  + Add Option
+                </Button>
               </div>
-            ))}
+              <div className="space-y-2">
+                {options.map((option, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <Input
+                      type="text"
+                      value={option}
+                      onChange={(e) => updateOption(index, e.target.value)}
+                      placeholder={`Option ${index + 1}`}
+                    />
+                    <Button
+                      onClick={() => removeOption(index)}
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end space-x-2">
+            <Button onClick={onCancel} variant="outline">
+              Cancel
+            </Button>
+            <Button onClick={handleSave} variant="primary">
+              {question ? 'Update' : 'Add'} Question
+            </Button>
           </div>
         </div>
-      )}
-
-      <div className="flex justify-end space-x-2">
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleSave}
-          className="px-4 py-2 text-sm text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
-        >
-          {question ? 'Update' : 'Add'} Question
-        </button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -178,13 +181,10 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">Question Bank</h3>
-        <button
-          onClick={() => setIsAdding(true)}
-          className="flex items-center px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-        >
+        <Button onClick={() => setIsAdding(true)} variant="primary">
           <PlusIcon className="w-4 h-4 mr-2" />
           Add Question
-        </button>
+        </Button>
       </div>
 
       {isAdding && (
@@ -232,19 +232,21 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
                 )}
               </div>
               <div className="flex items-center space-x-2 ml-4">
-                <button
+                <Button
                   onClick={() => onAddToStep(question.id)}
-                  className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition"
+                  variant="primary"
+                  size="sm"
                 >
                   Add to Step
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setEditingQuestion(question)}
-                  className="p-1 text-gray-400 hover:text-blue-600 transition"
+                  variant="ghost"
+                  size="icon"
                   title="Edit question"
                 >
                   <PencilIcon className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             </div>
           </div>
