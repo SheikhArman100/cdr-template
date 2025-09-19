@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ImageAsset, Question, QuestionType, TextSnippet } from '@/types/campaign.types';
 import { ArrowLeftIcon, DocumentTextIcon, PencilIcon, CheckIcon } from '@/components/icons';
-import { Sidebar } from '@/components/Sidebar';
+import { CampaignLeftPanel } from '@/components/CampaignLeftPanel';
 import { Canvas } from '@/components/Canvas';
 import { InspectorPanel } from '@/components/InspectorPanel';
 import { useCampaign, useUpdateCampaign, useUpdateCampaignStatus } from '@/hooks/useCampaigns';
@@ -268,7 +268,7 @@ export default function CampaignDetail() {
         </Button>
       </header>
       <main className="flex flex-1 min-h-0">
-        <Sidebar
+        <CampaignLeftPanel
           steps={currentCampaign.steps}
           selectedStepId={selectedStepId}
           onSelectStep={handleSelectStep}
