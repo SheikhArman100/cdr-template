@@ -128,6 +128,10 @@ export default function CreateCampaign() {
     setQuestions(prev => prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
   }, []);
 
+  const handleDeleteQuestion = useCallback((questionId: string) => {
+    setQuestions(prev => prev.filter(q => q.id !== questionId));
+  }, []);
+
   const handleAddTextSnippet = useCallback((snippet: TextSnippet) => {
     setTextSnippets(prev => [...prev, snippet]);
   }, []);
@@ -162,7 +166,7 @@ export default function CreateCampaign() {
     if (selectedStepId) addContent(selectedStepId, item);
   }, [selectedStepId, addContent]);
 
-  const handleSetBackground = useCallback((assetId: string) => {
+  const handleSetBackground = useCallback((assetId: string | null) => {
     if (selectedStepId) setBackground(selectedStepId, assetId);
   }, [selectedStepId, setBackground]);
 
@@ -341,6 +345,7 @@ export default function CreateCampaign() {
           onAddImageAsset={handleAddImageAsset}
           onAddQuestion={handleAddQuestion}
           onUpdateQuestion={handleUpdateQuestion}
+          onDeleteQuestion={handleDeleteQuestion}
           onAddTextSnippet={handleAddTextSnippet}
           onUpdateTextSnippet={handleUpdateTextSnippet}
         />

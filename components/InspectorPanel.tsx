@@ -21,6 +21,7 @@ interface InspectorPanelProps {
   onRemoveImageAsset?: (assetId: string) => void;
   onAddQuestion: (question: Question) => void;
   onUpdateQuestion: (question: Question) => void;
+  onDeleteQuestion?: (questionId: string) => void;
   onAddTextSnippet: (snippet: TextSnippet) => void;
   onUpdateTextSnippet: (snippet: TextSnippet) => void;
 }
@@ -49,7 +50,7 @@ const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style:
 };
 
 export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
-  const { selectedStep, onStyleChange, onAddContent, onSetBackground, onAddImageAsset, onRemoveImageAsset, onAddQuestion, onUpdateQuestion, onAddTextSnippet, onUpdateTextSnippet } = props;
+  const { selectedStep, onStyleChange, onAddContent, onSetBackground, onAddImageAsset, onRemoveImageAsset, onAddQuestion, onUpdateQuestion, onDeleteQuestion, onAddTextSnippet, onUpdateTextSnippet } = props;
   const [activeTab, setActiveTab] = useState('library');
   const [activeLibraryTab, setActiveLibraryTab] = useState('images');
 
@@ -62,7 +63,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
       case 'images':
         return <ImageLibrary imageAssets={props.imageAssets} onAddImageAsset={onAddImageAsset} onSelectImage={onSetBackground} onRemoveImageAsset={onRemoveImageAsset} />;
       case 'questions':
-        return <QuestionBank questions={props.questions} onAddQuestion={onAddQuestion} onUpdateQuestion={onUpdateQuestion} onAddToStep={(id:any) => onAddContent({ type: 'QUESTION', id })} />;
+        return <QuestionBank questions={props.questions} onAddQuestion={onAddQuestion} onUpdateQuestion={onUpdateQuestion} onDeleteQuestion={onDeleteQuestion} onAddToStep={(id:any) => onAddContent({ type: 'QUESTION', id })} />;
       case 'text':
         return <TextSnippetLibrary textSnippets={props.textSnippets} onAddTextSnippet={onAddTextSnippet} onUpdateTextSnippet={onUpdateTextSnippet} onAddToStep={(id:any) => onAddContent({ type: 'TEXT_SNIPPET', id })} />;
       default:
@@ -71,7 +72,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
   }
 
   return (
-    <aside className="w-96 bg-white border-l border-gray-200 flex flex-col z-10">
+    <aside className="w-96 bg-white border-l border-gray-200 flex flex-col z-10 overflow-y-auto">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2" variant="line">
           <TabsTrigger value="library">Library</TabsTrigger>

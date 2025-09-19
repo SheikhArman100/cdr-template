@@ -7,12 +7,13 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from './ui/dialog';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 
 interface QuestionBankProps {
   questions: Question[];
   onAddQuestion: (question: Question) => void;
   onUpdateQuestion: (question: Question) => void;
+  onDeleteQuestion?: (questionId: string) => void;
   onAddToStep: (questionId: string) => void;
 }
 
@@ -162,6 +163,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   questions,
   onAddQuestion,
   onUpdateQuestion,
+  onDeleteQuestion,
   onAddToStep
 }) => {
   const [isAdding, setIsAdding] = useState(false);
@@ -204,65 +206,85 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
 
       <div className="space-y-3">
         {questions.map((question) => (
-          <div
-            key={question.id}
-            className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h4 className="font-medium text-gray-900">{question.text}</h4>
-                <p className="text-sm text-gray-500 mt-1">
-                  Type: {question.type}
-                  {'placeholder' in question && question.placeholder && ` • Placeholder: ${question.placeholder}`}
-                </p>
-                {'options' in question && question.options && question.options.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-xs text-gray-500">Options:</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {question.options.map((option: string, index: number) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
-                        >
-                          {option}
-                        </span>
-                      ))}
+          <Card key={question.id} className="hover:shadow-md transition-shadow">
+            <CardContent className="p-5">
+              <div className="flex flex-col-reverse justify-start items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base font-semibold text-gray-900 mb-2">
+                    {question.text}
+                  </CardTitle>
+                  <CardDescription className="text-sm text-gray-600 mb-3">
+                    Type: <span className="font-medium">{question.type}</span>
+                    {'placeholder' in question && question.placeholder && (
+                      <span className="ml-2">• Placeholder: {question.placeholder}</span>
+                    )}
+                  </CardDescription>
+                  {'options' in question && question.options && question.options.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-gray-500 font-medium mb-2">Options:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {question.options.map((option: string, index: number) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full border"
+                          >
+                            {option}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+                <div className="flex items-center justify-end space-x-2  flex-shrink-0  w-full">
+                  <Button
+                    onClick={() => onAddToStep(question.id)}
+                    variant="primary"
+                    size="sm"
+                    className="h-8"
+                  >
+                    + Add to Step
+                  </Button>
+                  <Button
+                    onClick={() => setEditingQuestion(question)}
+                    variant="ghost"
+                    size="icon"
+                    title="Edit question"
+                    className="h-8 w-8 text-gray-500 hover:text-gray-700"
+                  >
+                    <PencilIcon className="w-4 h-4" />
+                  </Button>
+                  {onDeleteQuestion && (
+                    <Button
+                      onClick={() => onDeleteQuestion(question.id)}
+                      variant="ghost"
+                      size="icon"
+                      title="Delete question"
+                      className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center space-x-2 ml-4">
-                <Button
-                  onClick={() => onAddToStep(question.id)}
-                  variant="primary"
-                  size="sm"
-                >
-                  Add to Step
-                </Button>
-                <Button
-                  onClick={() => setEditingQuestion(question)}
-                  variant="ghost"
-                  size="icon"
-                  title="Edit question"
-                >
-                  <PencilIcon className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
       {questions.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          <div className="w-12 h-12 mx-auto mb-4 text-gray-300">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <p>No questions in bank</p>
-          <p className="text-sm">Add questions to collect user responses</p>
-        </div>
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="w-16 h-16 mx-auto mb-4 text-gray-300 bg-gray-50 rounded-full flex items-center justify-center">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-8 h-8">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <CardTitle className="text-lg text-gray-900 mb-2">No questions in bank</CardTitle>
+            <CardDescription className="text-center">
+              Add questions to collect user responses from your campaign participants.
+            </CardDescription>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
