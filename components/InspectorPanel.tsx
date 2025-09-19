@@ -16,8 +16,9 @@ interface InspectorPanelProps {
   textSnippets: TextSnippet[];
   onStyleChange: (style: Partial<ContentContainerStyle>) => void;
   onAddContent: (item: Omit<ContentItem, 'width' | 'height'>) => void;
-  onSetBackground: (assetId: string) => void;
+  onSetBackground: (assetId: string | null) => void;
   onAddImageAsset: (asset: ImageAsset) => void;
+  onRemoveImageAsset?: (assetId: string) => void;
   onAddQuestion: (question: Question) => void;
   onUpdateQuestion: (question: Question) => void;
   onAddTextSnippet: (snippet: TextSnippet) => void;
@@ -48,7 +49,7 @@ const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style:
 };
 
 export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
-  const { selectedStep, onStyleChange, onAddContent, onSetBackground, onAddImageAsset, onAddQuestion, onUpdateQuestion, onAddTextSnippet, onUpdateTextSnippet } = props;
+  const { selectedStep, onStyleChange, onAddContent, onSetBackground, onAddImageAsset, onRemoveImageAsset, onAddQuestion, onUpdateQuestion, onAddTextSnippet, onUpdateTextSnippet } = props;
   const [activeTab, setActiveTab] = useState('library');
   const [activeLibraryTab, setActiveLibraryTab] = useState('images');
 
@@ -59,7 +60,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
   const renderLibraryContent = () => {
     switch(activeLibraryTab) {
       case 'images':
-        return <ImageLibrary imageAssets={props.imageAssets} onAddImageAsset={onAddImageAsset} onSelectImage={onSetBackground} />;
+        return <ImageLibrary imageAssets={props.imageAssets} onAddImageAsset={onAddImageAsset} onSelectImage={onSetBackground} onRemoveImageAsset={onRemoveImageAsset} />;
       case 'questions':
         return <QuestionBank questions={props.questions} onAddQuestion={onAddQuestion} onUpdateQuestion={onUpdateQuestion} onAddToStep={(id:any) => onAddContent({ type: 'QUESTION', id })} />;
       case 'text':

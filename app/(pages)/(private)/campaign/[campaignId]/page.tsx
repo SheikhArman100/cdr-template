@@ -103,6 +103,10 @@ export default function CampaignDetail() {
     setImageAssets(prev => [...prev, asset]);
   }, []);
 
+  const handleRemoveImageAsset = useCallback((assetId: string) => {
+    setImageAssets(prev => prev.filter(asset => asset.id !== assetId));
+  }, []);
+
   const handleAddQuestion = useCallback((question: Question) => {
     setQuestions(prev => [...prev, question]);
   }, []);
@@ -145,8 +149,14 @@ export default function CampaignDetail() {
     if (selectedStepId) addContent(selectedStepId, item);
   }, [selectedStepId, addContent]);
 
-  const handleSetBackground = useCallback((assetId: string) => {
-    if (selectedStepId) setBackground(selectedStepId, assetId);
+  const handleSetBackground = useCallback((assetId: string | null) => {
+    console.log('Setting background for step:', selectedStepId, 'to asset:', assetId);
+    if (selectedStepId) {
+      setBackground(selectedStepId, assetId);
+      console.log('Background set successfully');
+    } else {
+      console.log('No selected step ID');
+    }
   }, [selectedStepId, setBackground]);
 
   const handleCampaignNameChange = useCallback((newName: string) => {
@@ -294,6 +304,7 @@ export default function CampaignDetail() {
           onAddContent={handleAddContent}
           onSetBackground={handleSetBackground}
           onAddImageAsset={handleAddImageAsset}
+          onRemoveImageAsset={handleRemoveImageAsset}
           onAddQuestion={handleAddQuestion}
           onUpdateQuestion={handleUpdateQuestion}
           onAddTextSnippet={handleAddTextSnippet}

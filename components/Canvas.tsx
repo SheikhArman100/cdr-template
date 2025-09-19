@@ -185,6 +185,9 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
 
   const backgroundImage = imageAssets.find(img => img.id === step.backgroundAssetId);
 
+  console.log('Canvas rendering with step:', step?.id, 'backgroundAssetId:', step?.backgroundAssetId);
+  console.log('Found background image:', backgroundImage);
+
   return (
     <div
       className="flex-1 flex items-center justify-center p-8 bg-gray-200 overflow-auto"

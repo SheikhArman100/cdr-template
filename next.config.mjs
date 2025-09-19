@@ -5,6 +5,18 @@ const nextConfig = {
 
   // Asset prefix for static assets
   assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || '',
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

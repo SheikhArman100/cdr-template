@@ -21,7 +21,7 @@ interface CampaignState {
   deleteStep: (stepId: string) => void;
   updateStepName: (stepId: string, name: string) => void;
   updateStyle: (stepId: string, style: Partial<ContentContainerStyle>) => void;
-  setBackground: (stepId: string, assetId: string) => void;
+  setBackground: (stepId: string, assetId: string | null) => void;
   addContent: (stepId: string, item: Omit<ContentItem, 'width' | 'height'>) => void;
   removeContent: (stepId: string, index: number) => void;
   reorderContent: (stepId: string, dragIndex: number, hoverIndex: number) => void;
@@ -166,7 +166,7 @@ export const useCampaignStore = create<CampaignState>()(
         }),
 
       setBackground: (stepId, assetId) =>
-        get().updateStep(stepId, { backgroundAssetId: assetId }),
+        get().updateStep(stepId, { backgroundAssetId: assetId || null }),
 
       addContent: (stepId, item) =>
         set((state) => {
