@@ -35,12 +35,12 @@ const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style:
             <div className="space-y-4">
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <CardTitle className="text-sm font-semibold text-gray-900">Colors</CardTitle>
+                    <CardTitle className="text-sm font-semibold text-foreground">Colors</CardTitle>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="background-color" className="text-xs font-medium text-gray-600">Background</Label>
+                        <Label htmlFor="background-color" className="text-xs font-medium text-muted-foreground">Background</Label>
                         <div className="flex items-center gap-2">
                             <Input
                                 id="background-color"
@@ -49,14 +49,14 @@ const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style:
                                 onChange={(e) => onChange({ backgroundColor: e.target.value })}
                                 className="w-12 h-8 p-1 border rounded cursor-pointer"
                             />
-                            <span className="text-xs text-gray-500 font-mono">
+                            <span className="text-xs text-muted-foreground font-mono">
                                 {style.backgroundColor.startsWith('rgba') ? style.backgroundColor : style.backgroundColor.toUpperCase()}
                             </span>
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="text-color" className="text-xs font-medium text-gray-600">Text</Label>
+                        <Label htmlFor="text-color" className="text-xs font-medium text-muted-foreground">Text</Label>
                         <div className="flex items-center gap-2">
                             <Input
                                 id="text-color"
@@ -65,7 +65,7 @@ const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style:
                                 onChange={(e) => onChange({ textColor: e.target.value })}
                                 className="w-12 h-8 p-1 border rounded cursor-pointer"
                             />
-                            <span className="text-xs text-gray-500 font-mono">
+                            <span className="text-xs text-muted-foreground font-mono">
                                 {style.textColor.toUpperCase()}
                             </span>
                         </div>
@@ -79,12 +79,12 @@ const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style:
             <div className="space-y-4">
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <CardTitle className="text-sm font-semibold text-gray-900">Border</CardTitle>
+                    <CardTitle className="text-sm font-semibold text-foreground">Border</CardTitle>
                 </div>
 
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="border-color" className="text-xs font-medium text-gray-600">Border Color</Label>
+                        <Label htmlFor="border-color" className="text-xs font-medium text-muted-foreground">Border Color</Label>
                         <div className="flex items-center gap-2">
                             <Input
                                 id="border-color"
@@ -93,7 +93,7 @@ const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style:
                                 onChange={(e) => onChange({ borderColor: e.target.value })}
                                 className="w-12 h-8 p-1 border rounded cursor-pointer"
                             />
-                            <span className="text-xs text-gray-500 font-mono">
+                            <span className="text-xs text-muted-foreground font-mono">
                                 {style.borderColor.toUpperCase()}
                             </span>
                         </div>
@@ -101,8 +101,8 @@ const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style:
 
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <Label htmlFor="border-width" className="text-xs font-medium text-gray-600">Thickness</Label>
-                            <span className="text-xs text-gray-500 font-mono">{style.borderWidth}px</span>
+                            <Label htmlFor="border-width" className="text-xs font-medium text-muted-foreground">Thickness</Label>
+                            <span className="text-xs text-muted-foreground font-mono">{style.borderWidth}px</span>
                         </div>
                         <Input
                             id="border-width"
@@ -113,7 +113,7 @@ const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style:
                             onChange={(e) => onChange({ borderWidth: parseInt(e.target.value) })}
                             className="w-full"
                         />
-                        <div className="flex justify-between text-xs text-gray-400">
+                        <div className="flex justify-between text-xs text-muted-foreground">
                             <span>0px</span>
                             <span>20px</span>
                         </div>
@@ -152,7 +152,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
   const [activeLibraryTab, setActiveLibraryTab] = useState('images');
 
   if (!selectedStep) {
-    return <aside className="w-96 bg-white border-l border-gray-200"></aside>;
+    return <aside className="w-96 bg-card border-l border-border"></aside>;
   }
 
   const renderLibraryContent = () => {
@@ -169,7 +169,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
   }
 
   return (
-    <aside className="w-96 bg-white border-l border-gray-200 flex flex-col z-10 overflow-y-auto">
+    <aside className="w-96 bg-card border-l border-border flex flex-col z-10 overflow-y-auto">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2" variant="line">
           <TabsTrigger value="library">Library</TabsTrigger>

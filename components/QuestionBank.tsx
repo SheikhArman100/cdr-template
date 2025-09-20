@@ -182,7 +182,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Question Bank</h3>
+        <h3 className="text-lg font-semibold text-foreground">Question Bank</h3>
         <Button onClick={() => setIsAdding(true)} variant="primary">
           <PlusIcon className="w-4 h-4 mr-2" />
           Add Question
@@ -210,10 +210,10 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
             <CardContent className="p-5">
               <div className="flex flex-col-reverse justify-start items-start gap-2">
                 <div className="flex-1 min-w-0">
-                  <CardTitle className="text-base font-semibold text-gray-900 mb-2">
+                  <CardTitle className="text-base font-semibold text-foreground mb-2">
                     {question.text}
                   </CardTitle>
-                  <CardDescription className="text-sm text-gray-600 mb-3">
+                  <CardDescription className="text-sm text-muted-foreground mb-3">
                     Type: <span className="font-medium">{question.type}</span>
                     {'placeholder' in question && question.placeholder && (
                       <span className="ml-2">• Placeholder: {question.placeholder}</span>
@@ -221,12 +221,12 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
                   </CardDescription>
                   {'options' in question && question.options && question.options.length > 0 && (
                     <div className="mb-3">
-                      <p className="text-xs text-gray-500 font-medium mb-2">Options:</p>
+                      <p className="text-xs text-muted-foreground font-medium mb-2">Options:</p>
                       <div className="flex flex-wrap gap-2">
                         {question.options.map((option: string, index: number) => (
                           <span
                             key={index}
-                            className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full border"
+                            className="px-3 py-1 text-xs bg-muted text-muted-foreground rounded-full border"
                           >
                             {option}
                           </span>
@@ -249,7 +249,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
                     variant="ghost"
                     size="icon"
                     title="Edit question"
-                    className="h-8 w-8 text-gray-500 hover:text-gray-700"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
                   >
                     <PencilIcon className="w-4 h-4" />
                   </Button>
@@ -274,12 +274,12 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
       {questions.length === 0 && (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="w-16 h-16 mx-auto mb-4 text-gray-300 bg-gray-50 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50 bg-muted rounded-full flex items-center justify-center">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-8 h-8">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <CardTitle className="text-lg text-gray-900 mb-2">No questions in bank</CardTitle>
+            <CardTitle className="text-lg text-foreground mb-2">No questions in bank</CardTitle>
             <CardDescription className="text-center">
               Add questions to collect user responses from your campaign participants.
             </CardDescription>

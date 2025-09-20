@@ -266,7 +266,7 @@ export default function CampaignDetail() {
             className="text-muted-foreground hover:text-primary"
           >
             <ArrowLeftIcon className="w-5 h-5 mr-2" />
-            Back to Campaigns
+           <span className='hidden lg:block'>Back to Campaigns</span> 
           </Button>
           <div className="w-px h-6 bg-border mx-2"></div>
           <div>

@@ -152,7 +152,7 @@ export const ImageLibrary: React.FC<ImageLibraryProps> = ({ imageAssets, onAddIm
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Image Library</h3>
+        <h3 className="text-lg font-semibold text-foreground">Image Library</h3>
         <Button onClick={() => setIsAdding(!isAdding)} variant="primary">
           <UploadIcon className="w-4 h-4 mr-2" />
           Add Image Url
@@ -202,7 +202,7 @@ export const ImageLibrary: React.FC<ImageLibraryProps> = ({ imageAssets, onAddIm
           'border-2 border-dashed transition-colors cursor-pointer',
           isDragging
             ? 'border-blue-500 bg-blue-50'
-            : 'border-gray-300 hover:border-gray-400'
+            : 'border-border hover:border-primary'
         )}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -213,12 +213,12 @@ export const ImageLibrary: React.FC<ImageLibraryProps> = ({ imageAssets, onAddIm
         <CardContent className="flex flex-col items-center justify-center py-8">
           <CloudUpload className={cn(
             'w-12 h-12 mb-4 transition-colors',
-            isDragging ? 'text-blue-500' : 'text-gray-400'
+            isDragging ? 'text-blue-500' : 'text-muted-foreground'
           )} />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <h3 className="text-lg font-medium text-foreground mb-2">
             {isDragging ? 'Drop images here' : 'Drag & drop images here'}
           </h3>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             or click to browse files (max 5MB each)
           </p>
           <Button type="button" variant="outline" size="sm">
@@ -258,7 +258,7 @@ export const ImageLibrary: React.FC<ImageLibraryProps> = ({ imageAssets, onAddIm
                   "relative group border-2 rounded-lg overflow-hidden transition-all",
                   isSelected
                     ? "border-blue-500 ring-2 ring-blue-200"
-                    : "border-gray-200 hover:border-blue-400"
+                    : "border-border hover:border-primary"
                 )}
               >
                 {/* Clickable image area for background setting */}
@@ -296,9 +296,9 @@ export const ImageLibrary: React.FC<ImageLibraryProps> = ({ imageAssets, onAddIm
                       onClick={(e) => handleImageClick(asset.id, e)}
                       variant="secondary"
                       size="sm"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 bg-white hover:bg-gray-100 pointer-events-auto"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 bg-background hover:bg-muted pointer-events-auto"
                     >
-                      <span className="text-black font-bold text-lg">+</span>
+                      <span className="text-foreground font-bold text-lg">+</span>
                     </Button>
                   )}
                 </div>
@@ -332,8 +332,8 @@ export const ImageLibrary: React.FC<ImageLibraryProps> = ({ imageAssets, onAddIm
       </Button>
 
       {imageAssets.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          <UploadIcon className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+        <div className="text-center py-8 text-muted-foreground">
+          <UploadIcon className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
           <p>No images in library</p>
           <p className="text-sm">Add images to use as backgrounds</p>
         </div>
