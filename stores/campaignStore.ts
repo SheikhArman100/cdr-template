@@ -3,15 +3,21 @@ import { persist } from 'zustand/middleware';
 import { Campaign, Step, ContentItem, ContentContainerStyle } from '@/types/campaign.types';
 
 interface CampaignState {
+  // Current user
+  currentUserId: string | null;
+  setCurrentUserId: (userId: string) => void;
+
   // Current campaign being edited
   currentCampaign: Campaign | null;
   setCurrentCampaign: (campaign: Campaign | null) => void;
 
-  // Draft campaigns (for creation)
+  // Draft campaigns (for creation) - per user
   draftCampaigns: Campaign[];
   saveDraftCampaign: (campaign: Campaign) => void;
   getDraftCampaign: (id: string) => Campaign | undefined;
   removeDraftCampaign: (id: string) => void;
+  clearAllDrafts: () => void;
+  getUserDrafts: () => Campaign[];
 
   // Campaign editing actions
   updateCampaignName: (name: string) => void;
@@ -58,8 +64,11 @@ const createNewCampaign = (): Campaign => ({
 export const useCampaignStore = create<CampaignState>()(
   persist(
     (set, get) => ({
+      currentUserId: null,
       currentCampaign: null,
       draftCampaigns: [],
+
+      setCurrentUserId: (userId) => set({ currentUserId: userId }),
 
       setCurrentCampaign: (campaign) => set({ currentCampaign: campaign }),
 
@@ -77,6 +86,15 @@ export const useCampaignStore = create<CampaignState>()(
         set((state) => ({
           draftCampaigns: state.draftCampaigns.filter(c => c.id !== id)
         })),
+
+      clearAllDrafts: () =>
+        set({ draftCampaigns: [] }),
+
+      getUserDrafts: () => {
+        const state = get();
+        if (!state.currentUserId) return [];
+        return state.draftCampaigns.filter(campaign => campaign.userId === state.currentUserId);
+      },
 
       updateCampaignName: (name) =>
         set((state) => ({
@@ -276,6 +294,7 @@ export const useCampaignStore = create<CampaignState>()(
     {
       name: 'campaign-store',
       partialize: (state) => ({
+        currentUserId: state.currentUserId,
         draftCampaigns: state.draftCampaigns,
         currentCampaign: state.currentCampaign,
       }),

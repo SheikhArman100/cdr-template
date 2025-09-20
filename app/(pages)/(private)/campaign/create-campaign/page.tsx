@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ImageAsset, Question, QuestionType, TextSnippet } from '@/types/campaign.types';
-import { ArrowLeftIcon, DocumentTextIcon, PencilIcon, CheckIcon, PanelLeftIcon, PanelRightIcon } from '@/components/icons';
+import { ArrowLeftIcon, DocumentTextIcon, PencilIcon, CheckIcon, PanelLeftIcon, PanelRightIcon, SaveIcon, RefreshCwIcon } from '@/components/icons';
 import { CampaignLeftPanel } from '@/components/CampaignLeftPanel';
 import { Canvas } from '@/components/Canvas';
 import { InspectorPanel } from '@/components/InspectorPanel';
@@ -13,6 +13,7 @@ import { ScreenLoader } from '@/components/screen-loader';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { toast } from 'sonner';
 
 const initialImageAssets: ImageAsset[] = [
   { id: 'img-1', name: 'Mountain View', url: 'https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=2070&auto=format&fit=crop' },
@@ -33,6 +34,8 @@ const initialTextSnippets: TextSnippet[] = [
 export default function CreateCampaign() {
   const router = useRouter();
   const {
+    currentUserId,
+    setCurrentUserId,
     currentCampaign,
     setCurrentCampaign,
     addStep,
@@ -46,11 +49,17 @@ export default function CreateCampaign() {
     resizeContent,
     draftCampaigns,
     saveDraftCampaign,
+    getUserDrafts,
   } = useCampaignStore();
+
+  const createCampaignMutation = useCreateCampaign();
 
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [showDraftRecovery, setShowDraftRecovery] = useState(false);
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
 
   // Mobile drawer states
   const [showLeftDrawer, setShowLeftDrawer] = useState(false);
@@ -61,37 +70,49 @@ export default function CreateCampaign() {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [textSnippets, setTextSnippets] = useState<TextSnippet[]>(initialTextSnippets);
 
-  // Check for existing drafts on mount
+  // Set current user ID on mount (in a real app, this would come from auth)
   useEffect(() => {
-    if (draftCampaigns.length > 0 && !currentCampaign) {
-      setShowDraftRecovery(true);
-    } else if (!currentCampaign) {
-      // Create new campaign if no drafts
-      const newCampaign = {
-        id: `campaign-${Date.now()}`,
-        name: 'New Campaign',
-        userId: '123',
-        status: 'inactive' as const,
-        lastModified: new Date().toISOString(),
-        steps: [
-          {
-            id: `step-${Date.now()}`,
-            name: 'Welcome Screen',
-            backgroundAssetId: null,
-            contentContainerStyle: {
-              backgroundColor: 'rgba(255, 255, 255, 0.8)',
-              borderColor: '#000000',
-              borderWidth: 2,
-              textColor: '#000000',
-            },
-            contentItems: [],
-            logic: [],
-          },
-        ],
-      };
-      setCurrentCampaign(newCampaign);
+    if (!currentUserId) {
+      // In a real app, get this from your auth system
+      const userId = '123'; // Mock user ID - matches existing campaigns
+      setCurrentUserId(userId);
     }
-  }, [draftCampaigns, currentCampaign, setCurrentCampaign]);
+  }, [currentUserId, setCurrentUserId]);
+
+  // Check for existing user-specific drafts on mount
+  useEffect(() => {
+    if (currentUserId && !currentCampaign) {
+      const userDrafts = getUserDrafts();
+      if (userDrafts.length > 0) {
+        setShowDraftRecovery(true);
+      } else {
+        // Create new campaign if no user drafts
+        const newCampaign = {
+          id: `campaign-${Date.now()}`,
+          name: 'New Campaign',
+          userId: currentUserId,
+          status: 'inactive' as const,
+          lastModified: new Date().toISOString(),
+          steps: [
+            {
+              id: `step-${Date.now()}`,
+              name: 'Welcome Screen',
+              backgroundAssetId: null,
+              contentContainerStyle: {
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                borderColor: '#000000',
+                borderWidth: 2,
+                textColor: '#000000',
+              },
+              contentItems: [],
+              logic: [],
+            },
+          ],
+        };
+        setCurrentCampaign(newCampaign);
+      }
+    }
+  }, [currentUserId, currentCampaign, setCurrentCampaign, getUserDrafts]);
 
   // Set selected step when campaign changes
   useEffect(() => {
@@ -105,6 +126,7 @@ export default function CreateCampaign() {
     if (currentCampaign) {
       const timeoutId = setTimeout(() => {
         saveDraftCampaign(currentCampaign);
+        setLastSaved(new Date().toLocaleString());
       }, 1000);
 
       return () => clearTimeout(timeoutId);
@@ -150,8 +172,18 @@ export default function CreateCampaign() {
   }, []);
 
   const handleExportToPDF = useCallback(async () => {
-    // PDF export logic would go here
-    console.log('Exporting campaign to PDF...');
+    setIsExporting(true);
+    try {
+      // Add 500ms loading effect
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // PDF export logic would go here
+      console.log('Exporting campaign to PDF...');
+    } catch (error) {
+      console.error('Failed to export PDF:', error);
+    } finally {
+      setIsExporting(false);
+    }
   }, []);
 
   // Wrapper functions for Canvas and InspectorPanel
@@ -189,22 +221,105 @@ export default function CreateCampaign() {
     }
   }, [currentCampaign, setCurrentCampaign]);
 
+  const handleReset = useCallback(async () => {
+    if (!currentCampaign) return;
+
+    setIsResetting(true);
+    try {
+      // Add 500ms loading effect
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Remove the current draft from localStorage
+      const { removeDraftCampaign } = useCampaignStore.getState();
+      removeDraftCampaign(currentCampaign.id);
+
+      // Clear current campaign to trigger fresh campaign creation
+      setCurrentCampaign(null);
+
+      // Reset selected step
+      setSelectedStepId(null);
+
+      // Clear last saved time
+      setLastSaved(null);
+
+      console.log('Campaign reset successfully');
+    } catch (error) {
+      console.error('Failed to reset campaign:', error);
+    } finally {
+      setIsResetting(false);
+    }
+  }, [currentCampaign, setCurrentCampaign]);
+
+  const handleSaveCampaign = useCallback(async () => {
+    if (!currentCampaign) return;
+
+    setIsSaving(true);
+    try {
+      // Add 500ms loading effect
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Prepare campaign data for API
+      const campaignData = {
+        name: currentCampaign.name,
+        userId: currentCampaign.userId,
+        status: 'active' as const,
+        steps: currentCampaign.steps,
+      };
+
+      // Create campaign via API
+      await createCampaignMutation.mutateAsync(campaignData);
+
+      // Show success toast
+      toast.success('Campaign saved successfully!', {
+        description: `"${currentCampaign.name}" has been created and is now active.`,
+      });
+
+      // Remove from drafts since it's now saved
+      const { removeDraftCampaign } = useCampaignStore.getState();
+      removeDraftCampaign(currentCampaign.id);
+
+      // Clear current campaign
+      setCurrentCampaign(null);
+
+      // Redirect to campaign list
+      router.push('/campaign');
+    } catch (error) {
+      console.error('Failed to save campaign:', error);
+      toast.error('Failed to save campaign', {
+        description: 'Please try again or contact support if the problem persists.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [currentCampaign, router, setCurrentCampaign, createCampaignMutation]);
+
 
 
   // Draft recovery UI
   if (showDraftRecovery) {
+    const userDrafts = getUserDrafts();
+    const latestDraft = userDrafts[userDrafts.length - 1];
+
     return (
       <div className="flex flex-col flex-1 h-[calc(100vh-var(--header-height))] bg-background">
         <div className="flex items-center justify-center h-full">
           <div className="bg-card p-6 rounded-lg shadow-lg max-w-md w-full mx-4 border border-border">
             <h2 className="text-xl font-bold text-foreground mb-3">Resume Your Work</h2>
             <p className="text-muted-foreground mb-4">
-              We found an unfinished campaign draft. Would you like to continue working on it?
+              We found {userDrafts.length} unfinished campaign draft{userDrafts.length > 1 ? 's' : ''}.
+              Would you like to continue working on your latest draft?
             </p>
+            {latestDraft && (
+              <div className="bg-muted/50 p-3 rounded-md mb-4">
+                <p className="text-sm font-medium text-foreground">{latestDraft.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  Last modified: {new Date(latestDraft.lastModified).toLocaleDateString()}
+                </p>
+              </div>
+            )}
             <div className="space-y-2">
               <Button
                 onClick={() => {
-                  const latestDraft = draftCampaigns[draftCampaigns.length - 1];
                   setCurrentCampaign(latestDraft);
                   setShowDraftRecovery(false);
                 }}
@@ -298,8 +413,8 @@ export default function CreateCampaign() {
   return (
     <div className="flex flex-col flex-1 min-h-[calc(100vh-var(--header-height)-40px)] lg:h-[calc(100vh-var(--header-height)-40px)] shadow-sm rounded-lg lg:overflow-y-auto">
       {/* Consistent Header for All Devices */}
-      <header className="bg-card border-b border-border p-2 flex items-center justify-between z-30 shrink-0">
-        <div className="flex items-center">
+      <header className="bg-card border-b border-border p-2 flex flex-col lg:flex-row items-start lg:items-center gap-3 justify-between z-30 shrink-0">
+        <div className="flex items-center w-full ">
           <Button
             onClick={handleBackToList}
             variant="ghost"
@@ -307,24 +422,54 @@ export default function CreateCampaign() {
             className="text-muted-foreground hover:text-primary"
           >
             <ArrowLeftIcon className="w-5 h-5" />
-            <span className='hidden lg:block'>Back to Campaigns</span> 
+            <span className='hidden lg:block'>Back to Campaigns</span>
           </Button>
           <div className="w-px h-6 bg-border mx-2"></div>
-          <div>
+          <div className='w-full '>
             <EditableCampaignName name={currentCampaign.name} onNameChange={handleCampaignNameChange} />
-            <p className="text-xs text-muted-foreground">Creating New Campaign</p>
+            <p className="text-xs text-muted-foreground">
+              Creating New Campaign
+              {lastSaved && (
+                <span className="ml-2 text-green-600 dark:text-green-400">
+                  • Auto-saved {lastSaved}
+                </span>
+              )}
+            </p>
           </div>
         </div>
-        <Button
-          onClick={handleExportToPDF}
-          disabled={isExporting}
-          variant="primary"
-          size="sm"
-          className="disabled:bg-muted"
-        >
-          <DocumentTextIcon className="w-5 h-5 mr-2" />
-          {isExporting ? 'Exporting...' : 'Export to PDF'}
-        </Button>
+
+        {/* Action Buttons */}
+        <div className=" w-full flex items-center justify-end gap-2">
+          <Button
+            onClick={handleReset}
+            disabled={isResetting}
+            variant="ghost"
+            size="sm"
+          >
+            <RefreshCwIcon className="w-4 h-4 mr-2" />
+            {isResetting ? 'Resetting...' : 'Reset'}
+          </Button>
+          <Button
+            onClick={handleSaveCampaign}
+            disabled={isSaving}
+            variant="primary"
+            size="sm"
+          >
+            <SaveIcon className="w-4 h-4 mr-2" />
+            {isSaving ? 'Saving...' : 'Save Campaign'}
+          </Button>
+          <Button
+            onClick={handleExportToPDF}
+            disabled={isExporting}
+            variant="outline"
+            size="sm"
+          >
+            <DocumentTextIcon className="w-4 h-4" />
+            <span className='inline ml-2'>
+              {isExporting ? 'Exporting...' : 'Export to PDF'}
+            </span>
+          </Button>
+        </div>
       </header>
 
       {/* Panel Toggle Buttons - Mobile Only */}
