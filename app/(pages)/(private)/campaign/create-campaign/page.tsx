@@ -47,9 +47,6 @@ export default function CreateCampaign() {
     removeContent,
     reorderContent,
     resizeContent,
-    draftCampaigns,
-    saveDraftCampaign,
-    getUserDrafts,
   } = useCampaignStore();
 
   const createCampaignMutation = useCreateCampaign();
@@ -58,7 +55,6 @@ export default function CreateCampaign() {
   const [isExporting, setIsExporting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-  const [showDraftRecovery, setShowDraftRecovery] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
 
   // Mobile drawer states
@@ -79,40 +75,39 @@ export default function CreateCampaign() {
     }
   }, [currentUserId, setCurrentUserId]);
 
-  // Check for existing user-specific drafts on mount
+  // Always create fresh campaign - clear any existing state
   useEffect(() => {
-    if (currentUserId && !currentCampaign) {
-      const userDrafts = getUserDrafts();
-      if (userDrafts.length > 0) {
-        setShowDraftRecovery(true);
-      } else {
-        // Create new campaign if no user drafts
-        const newCampaign = {
-          id: `campaign-${Date.now()}`,
-          name: 'New Campaign',
-          userId: currentUserId,
-          status: 'inactive' as const,
-          lastModified: new Date().toISOString(),
-          steps: [
-            {
-              id: `step-${Date.now()}`,
-              name: 'Welcome Screen',
-              backgroundAssetId: null,
-              contentContainerStyle: {
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                borderColor: '#000000',
-                borderWidth: 2,
-                textColor: '#000000',
-              },
-              contentItems: [],
-              logic: [],
+    if (currentUserId) {
+      // Clear any existing campaign and drafts for this user to ensure fresh start
+      const { clearDraft } = useCampaignStore.getState();
+      clearDraft();
+
+      // Always create new campaign - no draft recovery
+      const newCampaign = {
+        id: `campaign-${Date.now()}`,
+        name: 'New Campaign',
+        userId: currentUserId,
+        status: 'inactive' as const,
+        lastModified: new Date().toISOString(),
+        steps: [
+          {
+            id: `step-${Date.now()}`,
+            name: 'Welcome Screen',
+            backgroundAssetId: null,
+            contentContainerStyle: {
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              borderColor: '#000000',
+              borderWidth: 2,
+              textColor: '#000000',
             },
-          ],
-        };
-        setCurrentCampaign(newCampaign);
-      }
+            contentItems: [],
+            logic: [],
+          },
+        ],
+      };
+      setCurrentCampaign(newCampaign);
     }
-  }, [currentUserId, currentCampaign, setCurrentCampaign, getUserDrafts]);
+  }, [currentUserId, setCurrentCampaign]);
 
   // Set selected step when campaign changes
   useEffect(() => {
@@ -121,17 +116,18 @@ export default function CreateCampaign() {
     }
   }, [currentCampaign, selectedStepId]);
 
-  // Auto-save drafts
+  // Auto-save drafts every 1 second
   useEffect(() => {
     if (currentCampaign) {
       const timeoutId = setTimeout(() => {
+        const { saveDraftCampaign } = useCampaignStore.getState();
         saveDraftCampaign(currentCampaign);
         setLastSaved(new Date().toLocaleString());
       }, 1000);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [currentCampaign, saveDraftCampaign]);
+  }, [currentCampaign]);
 
   const selectedStep = currentCampaign?.steps.find(step => step.id === selectedStepId) || undefined;
 
@@ -229,10 +225,6 @@ export default function CreateCampaign() {
       // Add 500ms loading effect
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Remove the current draft from localStorage
-      const { removeDraftCampaign } = useCampaignStore.getState();
-      removeDraftCampaign(currentCampaign.id);
-
       // Clear current campaign to trigger fresh campaign creation
       setCurrentCampaign(null);
 
@@ -274,9 +266,7 @@ export default function CreateCampaign() {
         description: `"${currentCampaign.name}" has been created and is now active.`,
       });
 
-      // Remove from drafts since it's now saved
-      const { removeDraftCampaign } = useCampaignStore.getState();
-      removeDraftCampaign(currentCampaign.id);
+      // Campaign saved successfully
 
       // Clear current campaign
       setCurrentCampaign(null);
@@ -295,56 +285,7 @@ export default function CreateCampaign() {
 
 
 
-  // Draft recovery UI
-  if (showDraftRecovery) {
-    const userDrafts = getUserDrafts();
-    const latestDraft = userDrafts[userDrafts.length - 1];
 
-    return (
-      <div className="flex flex-col flex-1 h-[calc(100vh-var(--header-height))] bg-background">
-        <div className="flex items-center justify-center h-full">
-          <div className="bg-card p-6 rounded-lg shadow-lg max-w-md w-full mx-4 border border-border">
-            <h2 className="text-xl font-bold text-foreground mb-3">Resume Your Work</h2>
-            <p className="text-muted-foreground mb-4">
-              We found {userDrafts.length} unfinished campaign draft{userDrafts.length > 1 ? 's' : ''}.
-              Would you like to continue working on your latest draft?
-            </p>
-            {latestDraft && (
-              <div className="bg-muted/50 p-3 rounded-md mb-4">
-                <p className="text-sm font-medium text-foreground">{latestDraft.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  Last modified: {new Date(latestDraft.lastModified).toLocaleDateString()}
-                </p>
-              </div>
-            )}
-            <div className="space-y-2">
-              <Button
-                onClick={() => {
-                  setCurrentCampaign(latestDraft);
-                  setShowDraftRecovery(false);
-                }}
-                className="w-full"
-                variant="primary"
-              >
-                Resume Draft
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowDraftRecovery(false);
-                  // This will trigger the useEffect to create a new campaign
-                  setCurrentCampaign(null);
-                }}
-                className="w-full"
-                variant="secondary"
-              >
-                Start New Campaign
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (!currentCampaign) {
     return (

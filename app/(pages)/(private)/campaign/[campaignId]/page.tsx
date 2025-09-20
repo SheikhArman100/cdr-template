@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ImageAsset, Question, QuestionType, TextSnippet } from '@/types/campaign.types';
-import { ArrowLeftIcon, DocumentTextIcon, PencilIcon, CheckIcon } from '@/components/icons';
+import { ArrowLeftIcon, DocumentTextIcon, PencilIcon, CheckIcon, SaveIcon, RefreshCwIcon } from '@/components/icons';
 import { CampaignLeftPanel } from '@/components/CampaignLeftPanel';
 import { Canvas } from '@/components/Canvas';
 import { InspectorPanel } from '@/components/InspectorPanel';
@@ -12,6 +12,7 @@ import { useCampaignStore } from '@/stores/campaignStore';
 import { ScreenLoader } from '@/components/screen-loader';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const initialImageAssets: ImageAsset[] = [
   { id: 'img-1', name: 'Mountain View', url: 'https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=2070&auto=format&fit=crop' },
@@ -56,38 +57,23 @@ export default function CampaignDetail() {
 
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
 
   // Global assets (could also be moved to store if needed)
   const [imageAssets, setImageAssets] = useState<ImageAsset[]>(initialImageAssets);
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [textSnippets, setTextSnippets] = useState<TextSnippet[]>(initialTextSnippets);
 
-  // Load campaign data when fetched
+  // Load campaign data when fetched or when campaignId changes
   useEffect(() => {
-    if (campaign && !currentCampaign) {
+    if (campaign && (!currentCampaign || currentCampaign.id !== campaign.id)) {
       setCurrentCampaign(campaign);
       setSelectedStepId(campaign.steps[0]?.id || null);
     }
-  }, [campaign, currentCampaign, setCurrentCampaign]);
+  }, [campaign, campaignId, currentCampaign?.id, setCurrentCampaign]);
 
-  // Auto-save campaign changes
-  useEffect(() => {
-    if (currentCampaign && currentCampaign.id === campaignId) {
-      // Debounced save to API
-      const timeoutId = setTimeout(() => {
-        updateCampaignMutation.mutate({
-          id: currentCampaign.id,
-          updates: {
-            name: currentCampaign.name,
-            steps: currentCampaign.steps,
-            lastModified: currentCampaign.lastModified,
-          },
-        });
-      }, 1000);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [currentCampaign, campaignId, updateCampaignMutation]);
+  // No auto-save - only manual save via button
 
   const selectedStep = currentCampaign?.steps.find(step => step.id === selectedStepId) || undefined;
 
@@ -131,9 +117,57 @@ export default function CampaignDetail() {
     setTextSnippets(prev => prev.filter(s => s.id !== snippetId));
   }, []);
 
+  const handleSaveCampaign = useCallback(async () => {
+    if (!currentCampaign) return;
+
+    setIsSaving(true);
+    try {
+      // Add 500ms loading effect
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Save campaign via API
+      await updateCampaignMutation.mutateAsync({
+        id: currentCampaign.id,
+        updates: {
+          name: currentCampaign.name,
+          steps: currentCampaign.steps,
+          lastModified: new Date().toISOString(),
+        },
+      });
+
+      // Show success toast
+      toast.success('Campaign saved successfully!', {
+        description: `"${currentCampaign.name}" has been updated.`,
+      });
+
+      // Update last saved time
+      setLastSaved(new Date().toLocaleString());
+
+      // Redirect to campaign list
+      router.push('/campaign');
+    } catch (error) {
+      console.error('Failed to save campaign:', error);
+      toast.error('Failed to save campaign', {
+        description: 'Please try again or contact support if the problem persists.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [currentCampaign, router, updateCampaignMutation]);
+
   const handleExportToPDF = useCallback(async () => {
-    // PDF export logic would go here
-    console.log('Exporting campaign to PDF...');
+    setIsExporting(true);
+    try {
+      // Add 500ms loading effect
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // PDF export logic would go here
+      console.log('Exporting campaign to PDF...');
+    } catch (error) {
+      console.error('Failed to export PDF:', error);
+    } finally {
+      setIsExporting(false);
+    }
   }, []);
 
   // Wrapper functions for Canvas and InspectorPanel
@@ -158,12 +192,8 @@ export default function CampaignDetail() {
   }, [selectedStepId, addContent]);
 
   const handleSetBackground = useCallback((assetId: string | null) => {
-    console.log('Setting background for step:', selectedStepId, 'to asset:', assetId);
     if (selectedStepId) {
       setBackground(selectedStepId, assetId);
-      console.log('Background set successfully');
-    } else {
-      console.log('No selected step ID');
     }
   }, [selectedStepId, setBackground]);
 
@@ -179,11 +209,7 @@ export default function CampaignDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col flex-1 h-[calc(100vh-var(--header-height))]">
-        <div className="flex items-center justify-center h-full">
-          <div className="text-lg text-muted-foreground">Loading campaign...</div>
-        </div>
-      </div>
+      <ScreenLoader title='Loading campaign'/>
     );
   }
 
@@ -274,16 +300,32 @@ export default function CampaignDetail() {
             <p className="text-xs text-muted-foreground">Editing Campaign</p>
           </div>
         </div>
-        <Button
-          onClick={handleExportToPDF}
-          disabled={isExporting}
-          variant="primary"
-          size="sm"
-          className="disabled:bg-muted"
-        >
-          <DocumentTextIcon className="w-5 h-5 mr-2" />
-          {isExporting ? 'Exporting...' : 'Export to PDF'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleSaveCampaign}
+            disabled={isSaving}
+            variant="primary"
+            size="sm"
+            className="disabled:bg-muted"
+          >
+            {isSaving ? (
+              <RefreshCwIcon className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <SaveIcon className="w-4 h-4 mr-2" />
+            )}
+            {isSaving ? 'Saving...' : 'Save Campaign'}
+          </Button>
+          <Button
+            onClick={handleExportToPDF}
+            disabled={isExporting}
+            variant="outline"
+            size="sm"
+            className="disabled:bg-muted"
+          >
+            <DocumentTextIcon className="w-4 h-4 mr-2" />
+            {isExporting ? 'Exporting...' : 'Export PDF'}
+          </Button>
+        </div>
       </header>
       <main className="flex flex-1 min-h-0">
         <CampaignLeftPanel

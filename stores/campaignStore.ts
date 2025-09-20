@@ -11,13 +11,12 @@ interface CampaignState {
   currentCampaign: Campaign | null;
   setCurrentCampaign: (campaign: Campaign | null) => void;
 
-  // Draft campaigns (for creation) - per user
-  draftCampaigns: Campaign[];
+  // Draft campaign (single object for current user)
+  draftCampaign: Campaign | null;
   saveDraftCampaign: (campaign: Campaign) => void;
-  getDraftCampaign: (id: string) => Campaign | undefined;
-  removeDraftCampaign: (id: string) => void;
-  clearAllDrafts: () => void;
-  getUserDrafts: () => Campaign[];
+  getDraftCampaign: () => Campaign | null;
+  removeDraftCampaign: () => void;
+  clearDraft: () => void;
 
   // Campaign editing actions
   updateCampaignName: (name: string) => void;
@@ -66,35 +65,24 @@ export const useCampaignStore = create<CampaignState>()(
     (set, get) => ({
       currentUserId: null,
       currentCampaign: null,
-      draftCampaigns: [],
+      draftCampaign: null,
 
       setCurrentUserId: (userId) => set({ currentUserId: userId }),
 
       setCurrentCampaign: (campaign) => set({ currentCampaign: campaign }),
 
       saveDraftCampaign: (campaign) =>
-        set((state) => ({
-          draftCampaigns: [
-            ...state.draftCampaigns.filter(c => c.id !== campaign.id),
-            { ...campaign, lastModified: new Date().toISOString() }
-          ]
+        set(() => ({
+          draftCampaign: { ...campaign, lastModified: new Date().toISOString() }
         })),
 
-      getDraftCampaign: (id) => get().draftCampaigns.find(c => c.id === id),
+      getDraftCampaign: () => get().draftCampaign,
 
-      removeDraftCampaign: (id) =>
-        set((state) => ({
-          draftCampaigns: state.draftCampaigns.filter(c => c.id !== id)
-        })),
+      removeDraftCampaign: () =>
+        set({ draftCampaign: null }),
 
-      clearAllDrafts: () =>
-        set({ draftCampaigns: [] }),
-
-      getUserDrafts: () => {
-        const state = get();
-        if (!state.currentUserId) return [];
-        return state.draftCampaigns.filter(campaign => campaign.userId === state.currentUserId);
-      },
+      clearDraft: () =>
+        set({ draftCampaign: null }),
 
       updateCampaignName: (name) =>
         set((state) => ({
@@ -293,11 +281,11 @@ export const useCampaignStore = create<CampaignState>()(
     }),
     {
       name: 'campaign-store',
-      partialize: (state) => ({
-        currentUserId: state.currentUserId,
-        draftCampaigns: state.draftCampaigns,
-        currentCampaign: state.currentCampaign,
-      }),
+      partialize: (state) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { currentCampaign, ...persistState } = state;
+        return persistState;
+      },
     }
   )
 );
