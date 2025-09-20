@@ -190,7 +190,7 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
 
   return (
     <div
-      className="flex-1 flex items-center justify-center p-8 bg-gray-200 overflow-auto"
+      className="flex-1 p-8 bg-gray-200 overflow-y-auto overflow-x-hidden h-full"
       style={{
         backgroundImage: backgroundImage ? `url(${backgroundImage.url})` : 'none',
         backgroundSize: 'cover',
@@ -198,7 +198,7 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
       }}
     >
       <div
-        className="p-8 rounded-lg shadow-2xl space-y-4 max-w-2xl w-full"
+        className="p-8 rounded-lg shadow-2xl space-y-4 max-w-2xl w-full mx-auto"
         style={{
           backgroundColor: step.contentContainerStyle.backgroundColor,
           borderColor: step.contentContainerStyle.borderColor,

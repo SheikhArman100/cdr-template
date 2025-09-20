@@ -72,15 +72,15 @@ export const CampaignLeftPanel: React.FC<CampaignLeftPanelProps> = ({
   const [stepPendingDeletion, setStepPendingDeletion] = useState<string | null>(null);
 
   return (
-    <aside className="w-64 bg-card text-foreground flex flex-col shadow-sm border-r border-border">
+    <aside className="w-64 bg-card text-foreground flex flex-col shadow-sm border-r border-border h-full">
       {/* Header */}
-      <div className="p-3 border-b border-border bg-muted/30">
+      <div className="p-3 border-b border-border bg-muted/30 flex-shrink-0">
         <h2 className="text-base font-semibold text-foreground">Campaign Steps</h2>
         <p className="text-xs text-muted-foreground mt-1">Manage your campaign flow</p>
       </div>
 
       {/* Steps List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         <div className="p-2">
           {steps.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
@@ -154,12 +154,12 @@ export const CampaignLeftPanel: React.FC<CampaignLeftPanelProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="p-3 border-t border-border bg-muted/20">
+      <div className="p-3 border-t border-border bg-muted/20 flex-shrink-0">
         <Button
           onClick={onAddStep}
           className="w-full"
           variant="primary"
-         
+
         >
           <PlusIcon className="w-4 h-4 mr-2" />
           Add Step

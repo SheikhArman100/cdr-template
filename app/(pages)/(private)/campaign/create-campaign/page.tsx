@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ImageAsset, Question, QuestionType, TextSnippet } from '@/types/campaign.types';
-import { ArrowLeftIcon, DocumentTextIcon, PencilIcon, CheckIcon } from '@/components/icons';
+import { ArrowLeftIcon, DocumentTextIcon, PencilIcon, CheckIcon, PanelLeftIcon, PanelRightIcon } from '@/components/icons';
 import { CampaignLeftPanel } from '@/components/CampaignLeftPanel';
 import { Canvas } from '@/components/Canvas';
 import { InspectorPanel } from '@/components/InspectorPanel';
@@ -12,6 +12,7 @@ import { useCreateCampaign } from '@/hooks/useCampaigns';
 import { ScreenLoader } from '@/components/screen-loader';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 const initialImageAssets: ImageAsset[] = [
   { id: 'img-1', name: 'Mountain View', url: 'https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=2070&auto=format&fit=crop' },
@@ -50,6 +51,10 @@ export default function CreateCampaign() {
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [showDraftRecovery, setShowDraftRecovery] = useState(false);
+
+  // Mobile drawer states
+  const [showLeftDrawer, setShowLeftDrawer] = useState(false);
+  const [showRightDrawer, setShowRightDrawer] = useState(false);
 
   // Global assets (could also be moved to store if needed)
   const [imageAssets, setImageAssets] = useState<ImageAsset[]>(initialImageAssets);
@@ -282,7 +287,7 @@ export default function CreateCampaign() {
 
     return (
       <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setIsEditing(true)}>
-        <h1 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+        <h1 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
           {name}
         </h1>
         <PencilIcon className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -291,8 +296,9 @@ export default function CreateCampaign() {
   };
 
   return (
-    <div className="flex flex-col flex-1 h-[calc(100vh-var(--header-height)-40px)] shadow-sm  rounded-lg">
-      <header className="bg-card border-b border-border p-2 flex items-center justify-between z-30  shrink-0">
+    <div className="flex flex-col flex-1 min-h-[calc(100vh-var(--header-height)-40px)] lg:h-[calc(100vh-var(--header-height)-40px)] shadow-sm rounded-lg lg:overflow-y-auto">
+      {/* Consistent Header for All Devices */}
+      <header className="bg-card border-b border-border p-2 flex items-center justify-between z-30 shrink-0">
         <div className="flex items-center">
           <Button
             onClick={handleBackToList}
@@ -300,8 +306,7 @@ export default function CreateCampaign() {
             size="sm"
             className="text-muted-foreground hover:text-primary"
           >
-            <ArrowLeftIcon className="w-5 h-5 mr-2" />
-            Back to Campaigns
+            <ArrowLeftIcon className="w-5 h-5" />
           </Button>
           <div className="w-px h-6 bg-border mx-2"></div>
           <div>
@@ -320,40 +325,126 @@ export default function CreateCampaign() {
           {isExporting ? 'Exporting...' : 'Export to PDF'}
         </Button>
       </header>
-      <main className="flex flex-1 min-h-0">
-        <CampaignLeftPanel
-          steps={currentCampaign.steps}
-          selectedStepId={selectedStepId}
-          onSelectStep={handleSelectStep}
-          onAddStep={addStep}
-          onDeleteStep={deleteStep}
-          onUpdateStepName={updateStepName}
-        />
-        <Canvas
-          step={selectedStep}
-          imageAssets={imageAssets}
-          questions={questions}
-          textSnippets={textSnippets}
-          onRemoveContent={handleRemoveContent}
-          onReorderContent={handleReorderContent}
-          onResizeContent={handleResizeContent}
-        />
-        <InspectorPanel
-          selectedStep={selectedStep}
-          imageAssets={imageAssets}
-          questions={questions}
-          textSnippets={textSnippets}
-          onStyleChange={handleStyleChange}
-          onAddContent={handleAddContent}
-          onSetBackground={handleSetBackground}
-          onAddImageAsset={handleAddImageAsset}
-          onAddQuestion={handleAddQuestion}
-          onUpdateQuestion={handleUpdateQuestion}
-          onDeleteQuestion={handleDeleteQuestion}
-          onAddTextSnippet={handleAddTextSnippet}
-          onUpdateTextSnippet={handleUpdateTextSnippet}
-          onDeleteTextSnippet={handleDeleteTextSnippet}
-        />
+
+      {/* Panel Toggle Buttons - Mobile Only */}
+      <div className="bg-muted/30 border-b border-border p-2 flex items-center justify-center gap-2 z-20 shrink-0 lg:hidden">
+        <Button
+          onClick={() => setShowLeftDrawer(!showLeftDrawer)}
+          variant="outline"
+          size="sm"
+          className="text-muted-foreground hover:text-primary"
+        >
+          <PanelLeftIcon className="w-4 h-4 mr-2" />
+          Steps
+        </Button>
+        <Button
+          onClick={() => setShowRightDrawer(!showRightDrawer)}
+          variant="outline"
+          size="sm"
+          className="text-muted-foreground hover:text-primary"
+        >
+          <PanelRightIcon className="w-4 h-4 mr-2" />
+          Inspector
+        </Button>
+      </div>
+      {/* Responsive Main Layout */}
+      <main className="flex flex-1 min-h-0 relative h-full">
+        {/* Mobile Layout with Drawers */}
+        <div className="flex flex-1 lg:hidden h-full">
+          {/* Left Drawer */}
+          <Sheet open={showLeftDrawer} onOpenChange={setShowLeftDrawer}>
+            <SheetContent side="left" className="w-64 p-0">
+              <SheetHeader className="sr-only">
+                <SheetTitle>Campaign Steps</SheetTitle>
+              </SheetHeader>
+              <CampaignLeftPanel
+                steps={currentCampaign.steps}
+                selectedStepId={selectedStepId}
+                onSelectStep={handleSelectStep}
+                onAddStep={addStep}
+                onDeleteStep={deleteStep}
+                onUpdateStepName={updateStepName}
+              />
+            </SheetContent>
+          </Sheet>
+
+          {/* Canvas - Full Width and Height on Mobile */}
+          <div className="flex-1 h-full overflow-hidden">
+            <div className="h-full w-full relative ">
+              <Canvas
+                step={selectedStep}
+                imageAssets={imageAssets}
+                questions={questions}
+                textSnippets={textSnippets}
+                onRemoveContent={handleRemoveContent}
+                onReorderContent={handleReorderContent}
+                onResizeContent={handleResizeContent}
+              />
+            </div>
+          </div>
+
+          {/* Right Drawer */}
+          <Sheet open={showRightDrawer} onOpenChange={setShowRightDrawer}>
+            <SheetContent side="right" className="w-[90vw] sm:w-80 p-0">
+              <SheetHeader className="sr-only ">
+                <SheetTitle>Content Inspector</SheetTitle>
+              </SheetHeader>
+              <InspectorPanel
+                selectedStep={selectedStep}
+                imageAssets={imageAssets}
+                questions={questions}
+                textSnippets={textSnippets}
+                onStyleChange={handleStyleChange}
+                onAddContent={handleAddContent}
+                onSetBackground={handleSetBackground}
+                onAddImageAsset={handleAddImageAsset}
+                onAddQuestion={handleAddQuestion}
+                onUpdateQuestion={handleUpdateQuestion}
+                onDeleteQuestion={handleDeleteQuestion}
+                onAddTextSnippet={handleAddTextSnippet}
+                onUpdateTextSnippet={handleUpdateTextSnippet}
+                onDeleteTextSnippet={handleDeleteTextSnippet}
+              />
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        {/* Desktop Layout - Original Three Panel */}
+        <div className="hidden lg:flex flex-1">
+          <CampaignLeftPanel
+            steps={currentCampaign.steps}
+            selectedStepId={selectedStepId}
+            onSelectStep={handleSelectStep}
+            onAddStep={addStep}
+            onDeleteStep={deleteStep}
+            onUpdateStepName={updateStepName}
+          />
+          <Canvas
+            step={selectedStep}
+            imageAssets={imageAssets}
+            questions={questions}
+            textSnippets={textSnippets}
+            onRemoveContent={handleRemoveContent}
+            onReorderContent={handleReorderContent}
+            onResizeContent={handleResizeContent}
+          />
+          <InspectorPanel
+            selectedStep={selectedStep}
+            imageAssets={imageAssets}
+            questions={questions}
+            textSnippets={textSnippets}
+            onStyleChange={handleStyleChange}
+            onAddContent={handleAddContent}
+            onSetBackground={handleSetBackground}
+            onAddImageAsset={handleAddImageAsset}
+            onAddQuestion={handleAddQuestion}
+            onUpdateQuestion={handleUpdateQuestion}
+            onDeleteQuestion={handleDeleteQuestion}
+            onAddTextSnippet={handleAddTextSnippet}
+            onUpdateTextSnippet={handleUpdateTextSnippet}
+            onDeleteTextSnippet={handleDeleteTextSnippet}
+          />
+        </div>
       </main>
     </div>
   );
