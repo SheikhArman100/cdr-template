@@ -34,7 +34,16 @@ export const ImageLibrary: React.FC<ImageLibraryProps> = ({ imageAssets, onAddIm
     return null;
   };
 
-  const processFiles = useCallback((files: FileList | File[]) => {
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const processFiles = useCallback(async (files: FileList | File[]) => {
     const errors: string[] = [];
     const validFiles: File[] = [];
 
@@ -51,15 +60,21 @@ export const ImageLibrary: React.FC<ImageLibraryProps> = ({ imageAssets, onAddIm
       setUploadErrors(errors);
     }
 
-    validFiles.forEach((file) => {
-      const preview = URL.createObjectURL(file);
-      const asset: ImageAsset = {
-        id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        name: file.name,
-        url: preview,
-      };
-      onAddImageAsset(asset);
-    });
+    // Convert files to base64 and create assets
+    for (const file of validFiles) {
+      try {
+        const base64Url = await convertFileToBase64(file);
+        const asset: ImageAsset = {
+          id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: file.name,
+          url: base64Url,
+        };
+        onAddImageAsset(asset);
+      } catch (error) {
+        console.error('Error converting file to base64:', error);
+        setUploadErrors(prev => [...prev, `${file.name}: Failed to process file`]);
+      }
+    }
   }, [onAddImageAsset]);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
