@@ -254,24 +254,29 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
           </div>
 
           {/* Campaign Content Area */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden h-[calc(100%-1.5rem)]">
+          <div
+            className="flex-1 overflow-y-auto overflow-x-hidden h-[calc(100%-1.5rem)] p-3 flex justify-center items-center"
+            style={{
+              backgroundImage: backgroundImage ? `url(${backgroundImage.url})` : 'none',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
             <div
-              className="p-4 space-y-4 min-h-full relative"
+              className="p-2 space-y-4 relative"
               style={{
-                backgroundColor: backgroundImage ? 'transparent' : step.contentContainerStyle.backgroundColor,
-                backgroundImage: backgroundImage ? `url(${backgroundImage.url})` : 'none',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
+                backgroundColor: step.contentContainerStyle.backgroundColor,
                 borderColor: step.contentContainerStyle.borderColor,
                 borderWidth: `${step.contentContainerStyle.borderWidth}px`,
                 color: step.contentContainerStyle.textColor,
                 borderStyle: 'solid',
+                borderRadius: '8px',
               }}
             >
               {/* Semi-transparent overlay for better text readability */}
               {backgroundImage && (
                 <div
-                  className="absolute inset-0 bg-white/20 pointer-events-none"
+                  className="absolute inset-0  pointer-events-none"
                   style={{ zIndex: 1 }}
                 />
               )}
@@ -302,7 +307,7 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
                 </SortableContext>
               </DndContext>
               {step.contentItems.length === 0 && (
-                <div className="text-center py-12 border-2 border-dashed border-gray-400/50 rounded-lg">
+                <div className="text-center py-12 px-2 border-2 border-dashed border-gray-400/50 rounded-lg">
                   <p>This step is empty.</p>
                   <p className="text-sm text-gray-500/80">Add content from the Library panel.</p>
                 </div>

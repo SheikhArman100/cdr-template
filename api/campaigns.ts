@@ -11,12 +11,12 @@ let mockCampaigns: Campaign[] = [
         id: 'step-1',
         name: 'Welcome Screen',
         backgroundAssetId: null,
-        contentContainerStyle: {
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-          borderColor: '#000000',
-          borderWidth: 2,
-          textColor: '#000000',
-        },
+      contentContainerStyle: {
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        borderColor: '#000000',
+        borderWidth: 1,
+        textColor: '#000000',
+      },
         contentItems: [
           { type: 'TEXT_SNIPPET', id: 'ts-1', width: 280 },
           { type: 'QUESTION', id: 'q-2', width: 280 }
