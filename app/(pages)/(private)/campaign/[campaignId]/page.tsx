@@ -13,6 +13,8 @@ import { ScreenLoader } from '@/components/screen-loader';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const initialImageAssets: ImageAsset[] = [
   { id: 'img-1', name: 'Mountain View', url: 'https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=2070&auto=format&fit=crop' },
@@ -202,79 +204,251 @@ export default function CampaignDetail() {
     }
   }, [currentCampaign, router, updateCampaignMutation]);
 
-  const handleExportToPDF = useCallback(async () => {
-    if (!currentCampaign || currentCampaign.steps.length === 0) {
-      console.error('No campaign or steps to export');
-      return;
-    }
+const handleExportToPDF = useCallback(async () => {
+  if (!currentCampaign || currentCampaign.steps.length === 0) {
+    console.error('No campaign or steps to export');
+    toast.error('No campaign steps to export');
+    return;
+  }
 
-    setIsExporting(true);
-    try {
-      console.log('🎯 Starting PDF Export Process...');
-      console.log('📊 Campaign:', currentCampaign.name);
-      console.log('📄 Total Steps:', currentCampaign.steps.length);
+  setIsExporting(true);
 
-      // Capture the full mobile device frame for PDF
-      const canvasElement = document.getElementById('campaign-canvas') as HTMLElement;
+  try {
+    console.log('🎯 Starting PDF Export Process...');
+    console.log('📊 Campaign:', currentCampaign.name);
+    console.log('📄 Total Steps:', currentCampaign.steps.length);
 
-      if (!canvasElement) {
-        console.error('❌ Canvas element not found - campaign-canvas ID not found');
-        return;
+    // Create PDF document
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    // Process each step
+    for (let i = 0; i < currentCampaign.steps.length; i++) {
+      const step = currentCampaign.steps[i];
+      console.log(`\n📄 ===== Processing STEP ${i + 1}: ${step.name} =====`);
+
+      // Update the selected step to render the correct content
+      setSelectedStepId(step.id);
+
+      // Wait for React to update the UI and styles to apply
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Try to find the complete phone mockup container first
+      // Look for common phone mockup container classes/IDs
+      let targetElement = document.getElementById('campaign-canvas') as HTMLElement;
+      
+      // Try alternative selectors for phone mockup containers
+      const alternativeSelectors = [
+        '.phone-mockup',
+        '.device-mockup',
+        '.mobile-frame',
+        '.phone-container',
+        '[data-phone-mockup]',
+        '.mockup-phone'
+      ];
+      
+      // If campaign-canvas doesn't include the status bar, try to find the parent container
+      for (const selector of alternativeSelectors) {
+        const altElement = document.querySelector(selector) as HTMLElement;
+        if (altElement) {
+          // Check if this element contains the status bar elements
+          const hasStatusBar = altElement.querySelector('[class*="status"]') || 
+                               altElement.textContent?.includes('9:41') ||
+                               altElement.textContent?.includes('100%');
+          if (hasStatusBar) {
+            targetElement = altElement;
+            console.log(`📱 Found complete phone mockup: ${selector}`);
+            break;
+          }
+        }
       }
 
-      console.log('✅ Found full canvas element (with mobile wireframe):', canvasElement);
-      console.log('📋 Element details:');
-      console.log('- Tag:', canvasElement.tagName);
-      console.log('- Classes:', canvasElement.className);
-      console.log('- ID:', canvasElement.id);
-      console.log('- Attributes:', Array.from(canvasElement.attributes).map(attr => `${attr.name}="${attr.value}"`));
-      console.log('🎯 PDF will include complete mobile device frame');
+      if (!targetElement) {
+        console.error('❌ Target element not found');
+        continue;
+      }
 
-      // Process each step and log its HTML content
-      for (let i = 0; i < currentCampaign.steps.length; i++) {
-        const step = currentCampaign.steps[i];
-        console.log(`\n📄 ===== STEP ${i + 1}: ${step.name} =====`);
+      // Get the original element's computed styles and dimensions
+      const computedStyle = window.getComputedStyle(targetElement);
+      const originalRect = targetElement.getBoundingClientRect();
 
-        // Update the selected step to simulate step selection
-        setSelectedStepId(step.id);
+      // Clone the element and apply safe styles
+      const clonedElement = targetElement.cloneNode(true) as HTMLElement;
+      
+      // Preserve the original layout while making it capturable
+      clonedElement.style.cssText = `
+        position: absolute !important;
+        left: -9999px !important;
+        top: -9999px !important;
+        width: ${originalRect.width}px !important;
+        height: ${originalRect.height}px !important;
+        transform: none !important;
+        background: ${computedStyle.backgroundColor || '#ffffff'} !important;
+        overflow: visible !important;
+        z-index: -1 !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        padding: ${computedStyle.padding} !important;
+      `;
 
-        // Wait for React to update the UI
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Get the current HTML content of the canvas
-        const currentCanvasHTML = canvasElement.innerHTML;
-        const currentCanvasText = canvasElement.textContent || '';
-
-        console.log('🔍 Canvas HTML Content:');
-        console.log(currentCanvasHTML);
-
-        console.log('📝 Canvas Text Content:');
-        console.log(currentCanvasText);
-
-        console.log('🏷️  Step Details:');
-        console.log('- Name:', step.name);
-        console.log('- Background Asset ID:', step.backgroundAssetId);
-        console.log('- Content Items:', step.contentItems.length);
-        console.log('- Content Items Details:', step.contentItems);
-
-        // Log background image if exists
-        if (step.backgroundAssetId) {
-          const bgImage = imageAssets.find(img => img.id === step.backgroundAssetId);
-          console.log('- Background Image:', bgImage);
+      // Apply fallback styles to all elements in the cloned tree
+      const applyFallbackStyles = (element: HTMLElement) => {
+        // Preserve important layout properties
+        const originalStyle = window.getComputedStyle(element);
+        
+        // Apply safe colors while preserving layout
+        element.style.borderColor = element.style.borderColor || '#e4e4e7';
+        element.style.color = element.style.color || '#09090b';
+        
+        // Ensure visibility of status bar elements
+        if (element.textContent?.includes('9:41') || 
+            element.textContent?.includes('100%') || 
+            element.classList.contains('status-bar') ||
+            element.getAttribute('class')?.includes('status')) {
+          element.style.visibility = 'visible';
+          element.style.opacity = '1';
+          element.style.display = originalStyle.display === 'none' ? 'block' : originalStyle.display;
         }
 
-        console.log(`✅ ===== END STEP ${i + 1} =====\n`);
+        // Remove any inline styles that might contain problematic functions
+        const inlineStyle = element.getAttribute('style');
+        if (inlineStyle && (inlineStyle.includes('oklch') || inlineStyle.includes('color-mix'))) {
+          element.setAttribute('style', 
+            inlineStyle
+              .replace(/oklch\([^)]+\)/g, '#e4e4e7')
+              .replace(/color-mix\([^)]+\)/g, '#e4e4e7')
+          );
+        }
+
+        // Recursively apply to children
+        Array.from(element.children).forEach(child => {
+          applyFallbackStyles(child as HTMLElement);
+        });
+      };
+
+      applyFallbackStyles(clonedElement);
+
+      // Temporarily add cloned element to body
+      document.body.appendChild(clonedElement);
+
+      // Wait a moment for styles to apply
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      // Use html2canvas with enhanced options
+      const canvas = await html2canvas(clonedElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: clonedElement.offsetWidth,
+        height: clonedElement.offsetHeight,
+        ignoreElements: (element) => {
+          // Don't ignore status bar elements
+          if (element.textContent?.includes('9:41') || 
+              element.textContent?.includes('100%') || 
+              element.classList.contains('status-bar')) {
+            return false;
+          }
+          
+          // Ignore problematic elements
+          const classList = element.classList;
+          return classList.contains('group-hover:opacity-100') ||
+                 classList.contains('opacity-0') ||
+                 element.tagName === 'SCRIPT' ||
+                 element.tagName === 'STYLE' ||
+                 element.style.visibility === 'hidden';
+        },
+        onclone: (clonedDoc) => {
+          // Additional cleanup on the cloned document
+          const style = clonedDoc.createElement('style');
+          style.textContent = `
+            * { 
+              border-color: #e4e4e7 !important; 
+              color: #09090b !important;
+            }
+            /* Ensure status bar elements are visible */
+            .status-bar,
+            [class*="status"],
+            [class*="time"],
+            [class*="battery"],
+            [class*="signal"] {
+              visibility: visible !important;
+              opacity: 1 !important;
+              display: block !important;
+            }
+          `;
+          clonedDoc.head.appendChild(style);
+        },
+        logging: false
+      });
+
+      // Remove cloned element
+      document.body.removeChild(clonedElement);
+
+      // Convert canvas to image
+      const imgData = canvas.toDataURL('image/png', 1.0);
+
+      // Calculate dimensions to fit A4 page with margins
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10; // 10mm margin
+      const availableWidth = pdfWidth - (margin * 2);
+      const availableHeight = pdfHeight - (margin * 2);
+      
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+
+      // Add new page if not the first step
+      if (i > 0) {
+        pdf.addPage();
       }
 
-      console.log('🎉 HTML Content Logging Complete!');
-      console.log('💡 This HTML content will be converted to PDF in the future.');
+      // Add step name above the mobile wireframe
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'bold');
+      const stepNameText = `Step ${i + 1}: ${step.name}`;
+      const textWidth = pdf.getTextWidth(stepNameText);
+      const textX = (pdfWidth - textWidth) / 2;
+      const textY = 20;
 
-    } catch (error) {
-      console.error('❌ Failed to log HTML content:', error);
-    } finally {
-      setIsExporting(false);
+      pdf.text(stepNameText, textX, textY);
+
+      // Calculate image positioning
+      const imageY = textY + 10;
+      const availableHeightForImage = pdfHeight - imageY - 10;
+      const imageRatio = Math.min(availableWidth / (imgWidth / 2), availableHeightForImage / (imgHeight / 2));
+      const finalImgScaledWidth = (imgWidth / 2) * imageRatio;
+      const finalImgScaledHeight = (imgHeight / 2) * imageRatio;
+      const finalX = (pdfWidth - finalImgScaledWidth) / 2;
+      const finalY = imageY;
+
+      // Add image to PDF
+      pdf.addImage(imgData, 'PNG', finalX, finalY, finalImgScaledWidth, finalImgScaledHeight);
+
+      console.log(`✅ ===== STEP ${i + 1} added to PDF (${targetElement.id || targetElement.className}) =====\n`);
     }
-  }, [currentCampaign, imageAssets]);
+
+    // Save the PDF
+    const fileName = `${currentCampaign.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_campaign.pdf`;
+    pdf.save(fileName);
+
+    console.log('🎉 PDF Export Complete!');
+    toast.success('PDF exported successfully!', {
+      description: `Downloaded ${fileName}`,
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to export PDF:', error);
+    toast.error('Failed to export PDF', {
+      description: 'Please try again or contact support if the problem persists.',
+    });
+  } finally {
+    setIsExporting(false);
+  }
+}, [currentCampaign]);
 
   // Wrapper functions for Canvas and InspectorPanel
   const handleRemoveContent = useCallback((index: number) => {
