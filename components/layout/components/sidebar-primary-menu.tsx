@@ -8,10 +8,12 @@ import {
 } from '@/components/ui/accordion-menu';
 import { Badge } from '@/components/ui/badge';
 import { usePathname } from 'next/navigation';
+import { useLayoutStore } from '@/stores/layoutStore';
 import Link from 'next/link';
 
 export function SidebarPrimaryMenu() {
   const pathname = usePathname();
+  const selectedPrimaryItem = useLayoutStore((state) => state.selectedPrimaryItem);
 
   // Memoize matchPath to prevent unnecessary re-renders
   const matchPath = useCallback(
@@ -19,6 +21,11 @@ export function SidebarPrimaryMenu() {
       path === pathname || (path.length > 1 && pathname.startsWith(path) && path !== '/layout-14'),
     [pathname],
   );
+
+  // Find the menu group for the selected primary item
+  const selectedGroup = MENU_SIDEBAR_MAIN.find(item => item.title === selectedPrimaryItem);
+
+  if (!selectedGroup) return null;
 
   return (
     <AccordionMenu
@@ -32,26 +39,22 @@ export function SidebarPrimaryMenu() {
         group: '',
       }}
     >
-      {MENU_SIDEBAR_MAIN.map((item, index) => {
-        return (
-          <AccordionMenuGroup key={index}>
-            <AccordionMenuLabel>
-              {item.title}
-            </AccordionMenuLabel>
-            {item.children?.map((child, index) => {
-              return (
-                <AccordionMenuItem key={index} value={child.path || '#'}>
-                  <Link href={child.path || '#'}>
-                    {child.icon && <child.icon />}
-                    <span>{child.title}</span>
-                    {child.badge == 'Beta' && <Badge size="sm" variant="destructive" appearance="light">{child.badge}</Badge>}
-                  </Link>
-                </AccordionMenuItem>
-              )
-            })}
-          </AccordionMenuGroup>
-        )
-      })}
+      <AccordionMenuGroup>
+        <AccordionMenuLabel>
+          {selectedGroup.title}
+        </AccordionMenuLabel>
+        {selectedGroup.children?.map((child, index) => {
+          return (
+            <AccordionMenuItem key={index} value={child.path || '#'}>
+              <Link href={child.path || '#'}>
+                {child.icon && <child.icon />}
+                <span>{child.title}</span>
+                {child.badge == 'Beta' && <Badge size="sm" variant="destructive" appearance="light">{child.badge}</Badge>}
+              </Link>
+            </AccordionMenuItem>
+          )
+        })}
+      </AccordionMenuGroup>
     </AccordionMenu>
   );
 }

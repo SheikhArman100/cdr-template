@@ -20,11 +20,60 @@ import {
   BarChart3,
   Network,
   Phone,
-  MessageCircle
+  MessageCircle,
+  User,
+  Settings,
+  Shield,
+  CreditCard,
+  Activity,
+  LogIn,
+  ShieldCheck,
+  Monitor,
+  Key,
+  FileText,
+  Search,
+  AlertTriangle,
+  File,
+  Image,
+  Video,
+  Archive,
+  Inbox,
+  Send,
+  Edit,
+  Trash,
+  UserCheck,
+  Lock,
+  FileCheck
 } from "lucide-react";
 
 export const MENU_SIDEBAR_MAIN: MenuConfig = [
   {
+    title: 'Profile',
+    children: [
+      {
+        title: 'View Profile',
+        path: '/profile/view',
+        icon: User
+      },
+      {
+        title: 'Edit Profile',
+        path: '/profile/edit',
+        icon: Edit
+      },
+      {
+        title: 'Avatar',
+        path: '/profile/avatar',
+        icon: Image
+      },
+      {
+        title: 'Bio',
+        path: '/profile/bio',
+        icon: FileText
+      },
+    ],
+  },
+  {
+    title: 'Dashboard',
     children: [
       {
         title: 'Dashboard',
@@ -47,7 +96,32 @@ export const MENU_SIDEBAR_MAIN: MenuConfig = [
         icon: MessageCircle
       },
     ],
-  }
+  },
+  {
+    title: 'Account',
+    children: [
+      {
+        title: 'Profile Settings',
+        path: '/account/profile',
+        icon: User
+      },
+      {
+        title: 'Preferences',
+        path: '/account/preferences',
+        icon: Settings
+      },
+      {
+        title: 'Security',
+        path: '/account/security',
+        icon: Shield
+      },
+      {
+        title: 'Billing',
+        path: '/account/billing',
+        icon: CreditCard
+      },
+    ],
+  },
 ];
 
 export const MENU_SIDEBAR_RESOURCES: MenuConfig = [

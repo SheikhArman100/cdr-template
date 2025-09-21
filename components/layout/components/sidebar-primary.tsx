@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { cn } from '@/lib/utils';
+import { useLayoutStore } from '@/stores/layoutStore';
 import {
   BarChart3,
   Bell,
@@ -55,8 +56,8 @@ const menuItems = [
   {
     icon: UserCircle,
     tooltip: 'Profile',
-    path: '#',
-    rootPath: '#',
+    path: '/profile',
+    rootPath: '/profile',
   },
   {
     icon: BarChart3,
@@ -67,50 +68,15 @@ const menuItems = [
   {
     icon: Settings,
     tooltip: 'Account',
-    path: '#',
-    rootPath: '#',
-  },
-  {
-    icon: Users,
-    tooltip: 'Network',
-    path: '#',
-    rootPath: '#',
-  },
-  {
-    icon: ShieldUser,
-    tooltip: 'Authentication',
-    path: '#',
-    rootPath: '#',
-  },
-  {
-    icon: FolderCode,
-    tooltip: 'Security Logs',
-    path: '#',
-    rootPath: '#',
-  },
-  {
-    icon: ScrollText,
-    tooltip: 'Files',
-    path: '#',
-    rootPath: '#',
-  },
-  {
-    icon: Bell,
-    tooltip: 'Notifications',
-    path: '#',
-    rootPath: '#',
-  },
-  {
-    icon: CheckSquare,
-    tooltip: 'ACL',
-    path: '#',
-    rootPath: '#',
+    path: '/account',
+    rootPath: '/account',
   },
 ];
 
 export function SidebarPrimary() {
   const pathname = usePathname();
   const [selectedMenuItem, setSelectedMenuItem] = useState(menuItems[1]);
+  const setSelectedPrimaryItem = useLayoutStore((state) => state.setSelectedPrimaryItem);
 
   useEffect(() => {
     menuItems.forEach((item) => {
@@ -119,9 +85,10 @@ export function SidebarPrimary() {
         (item.rootPath && pathname.includes(item.rootPath))
       ) {
         setSelectedMenuItem(item);
+        setSelectedPrimaryItem(item.tooltip);
       }
     });
-  }, [pathname]);
+  }, [pathname, setSelectedPrimaryItem]);
 
   return (
     <div className="flex flex-col items-center justify-center shrink-0 px-2.5 py-2.5 gap-5 lg:w-(--sidebar-collapsed-width) border-e border-input bg-muted">
