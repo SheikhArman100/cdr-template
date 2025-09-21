@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ImageAsset, Question, QuestionType, TextSnippet } from '@/types/campaign.types';
+import { ImageAsset, Question, QuestionType, TextSnippet, ButtonContent } from '@/types/campaign.types';
 import { ArrowLeftIcon, DocumentTextIcon, PencilIcon, CheckIcon, PanelLeftIcon, PanelRightIcon, SaveIcon, RefreshCwIcon } from '@/components/icons';
 import { CampaignLeftPanel } from '@/components/CampaignLeftPanel';
 import { Canvas } from '@/components/Canvas';
@@ -29,6 +29,12 @@ const initialQuestions: Question[] = [
 const initialTextSnippets: TextSnippet[] = [
   { id: 'ts-1', name: 'Welcome Message', text: 'Welcome to our campaign!' },
   { id: 'ts-2', name: 'Thank You', text: 'Thank you for your submission.' },
+];
+
+const initialButtons: ButtonContent[] = [
+  { id: 'btn-signin', text: 'Sign In', isDefault: true },
+  { id: 'btn-next', text: 'Next', isDefault: true },
+  { id: 'btn-prev', text: 'Prev', isDefault: true },
 ];
 
 export default function CreateCampaign() {
@@ -65,6 +71,7 @@ export default function CreateCampaign() {
   const [imageAssets, setImageAssets] = useState<ImageAsset[]>(initialImageAssets);
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [textSnippets, setTextSnippets] = useState<TextSnippet[]>(initialTextSnippets);
+  const [buttons, setButtons] = useState<ButtonContent[]>(initialButtons);
 
   // Set current user ID on mount (in a real app, this would come from auth)
   useEffect(() => {
@@ -186,6 +193,18 @@ export default function CreateCampaign() {
 
   const handleDeleteTextSnippet = useCallback((snippetId: string) => {
     setTextSnippets(prev => prev.filter(s => s.id !== snippetId));
+  }, []);
+
+  const handleAddButton = useCallback((button: ButtonContent) => {
+    setButtons(prev => [...prev, button]);
+  }, []);
+
+  const handleUpdateButton = useCallback((updatedButton: ButtonContent) => {
+    setButtons(prev => prev.map(b => b.id === updatedButton.id ? updatedButton : b));
+  }, []);
+
+  const handleDeleteButton = useCallback((buttonId: string) => {
+    setButtons(prev => prev.filter(b => b.id !== buttonId));
   }, []);
 
   const handleExportToPDF = useCallback(async () => {
@@ -522,6 +541,7 @@ export default function CreateCampaign() {
                 imageAssets={imageAssets}
                 questions={questions}
                 textSnippets={textSnippets}
+                buttons={buttons}
                 onRemoveContent={handleRemoveContent}
                 onReorderContent={handleReorderContent}
                 onResizeContent={handleResizeContent}
@@ -540,6 +560,7 @@ export default function CreateCampaign() {
                 imageAssets={imageAssets}
                 questions={questions}
                 textSnippets={textSnippets}
+                buttons={buttons}
                 onStyleChange={handleStyleChange}
                 onAddContent={handleAddContent}
                 onSetBackground={handleSetBackground}
@@ -550,6 +571,9 @@ export default function CreateCampaign() {
                 onAddTextSnippet={handleAddTextSnippet}
                 onUpdateTextSnippet={handleUpdateTextSnippet}
                 onDeleteTextSnippet={handleDeleteTextSnippet}
+                onAddButton={handleAddButton}
+                onUpdateButton={handleUpdateButton}
+                onDeleteButton={handleDeleteButton}
               />
             </SheetContent>
           </Sheet>
@@ -570,6 +594,7 @@ export default function CreateCampaign() {
             imageAssets={imageAssets}
             questions={questions}
             textSnippets={textSnippets}
+            buttons={buttons}
             onRemoveContent={handleRemoveContent}
             onReorderContent={handleReorderContent}
             onResizeContent={handleResizeContent}
@@ -579,6 +604,7 @@ export default function CreateCampaign() {
             imageAssets={imageAssets}
             questions={questions}
             textSnippets={textSnippets}
+            buttons={buttons}
             onStyleChange={handleStyleChange}
             onAddContent={handleAddContent}
             onSetBackground={handleSetBackground}
@@ -589,6 +615,9 @@ export default function CreateCampaign() {
             onAddTextSnippet={handleAddTextSnippet}
             onUpdateTextSnippet={handleUpdateTextSnippet}
             onDeleteTextSnippet={handleDeleteTextSnippet}
+            onAddButton={handleAddButton}
+            onUpdateButton={handleUpdateButton}
+            onDeleteButton={handleDeleteButton}
           />
         </div>
       </main>

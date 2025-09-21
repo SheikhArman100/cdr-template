@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import type { Step, ImageAsset, Question, TextSnippet, ContentContainerStyle, ContentItem } from '../types/campaign.types';
+import type { Step, ImageAsset, Question, TextSnippet, ButtonContent, ContentContainerStyle, ContentItem } from '../types/campaign.types';
 import { ImageLibrary } from './ImageLibrary';
 import { QuestionBank } from './QuestionBank';
 import { TextSnippetLibrary } from './TextSnippetLibrary';
+import { ButtonLibrary } from './ButtonLibrary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Input } from './ui/input';
@@ -15,6 +16,7 @@ interface InspectorPanelProps {
   imageAssets: ImageAsset[];
   questions: Question[];
   textSnippets: TextSnippet[];
+  buttons: ButtonContent[];
   onStyleChange: (style: Partial<ContentContainerStyle>) => void;
   onAddContent: (item: Omit<ContentItem, 'width' | 'height'>) => void;
   onSetBackground: (assetId: string | null) => void;
@@ -26,6 +28,9 @@ interface InspectorPanelProps {
   onAddTextSnippet: (snippet: TextSnippet) => void;
   onUpdateTextSnippet: (snippet: TextSnippet) => void;
   onDeleteTextSnippet?: (snippetId: string) => void;
+  onAddButton: (button: ButtonContent) => void;
+  onUpdateButton: (button: ButtonContent) => void;
+  onDeleteButton?: (buttonId: string) => void;
 }
 
 const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style: Partial<ContentContainerStyle>) => void }> = ({ style, onChange }) => {
@@ -147,7 +152,7 @@ const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style:
 };
 
 export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
-  const { selectedStep, onStyleChange, onAddContent, onSetBackground, onAddImageAsset, onRemoveImageAsset, onAddQuestion, onUpdateQuestion, onDeleteQuestion, onAddTextSnippet, onUpdateTextSnippet, onDeleteTextSnippet } = props;
+  const { selectedStep, onStyleChange, onAddContent, onSetBackground, onAddImageAsset, onRemoveImageAsset, onAddQuestion, onUpdateQuestion, onDeleteQuestion, onAddTextSnippet, onUpdateTextSnippet, onDeleteTextSnippet, onAddButton, onUpdateButton, onDeleteButton } = props;
   const [activeTab, setActiveTab] = useState('library');
   const [activeLibraryTab, setActiveLibraryTab] = useState('images');
 
@@ -163,6 +168,8 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
         return <QuestionBank questions={props.questions} onAddQuestion={onAddQuestion} onUpdateQuestion={onUpdateQuestion} onDeleteQuestion={onDeleteQuestion} onAddToStep={(id:any) => onAddContent({ type: 'QUESTION', id })} />;
       case 'text':
         return <TextSnippetLibrary textSnippets={props.textSnippets} onAddTextSnippet={onAddTextSnippet} onUpdateTextSnippet={onUpdateTextSnippet} onDeleteTextSnippet={onDeleteTextSnippet} onAddToStep={(id:any) => onAddContent({ type: 'TEXT_SNIPPET', id })} />;
+      case 'buttons':
+        return <ButtonLibrary buttons={props.buttons} onAddButton={onAddButton} onUpdateButton={onUpdateButton} onDeleteButton={onDeleteButton} onAddToStep={(id:any) => onAddContent({ type: 'BUTTON', id })} />;
       default:
         return null;
     }
@@ -179,10 +186,11 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
         <div className="flex-grow overflow-y-auto">
           <TabsContent value="library" className="mt-0">
             <Tabs value={activeLibraryTab} onValueChange={setActiveLibraryTab}>
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="images">Images</TabsTrigger>
                 <TabsTrigger value="questions">Questions</TabsTrigger>
-                <TabsTrigger value="text">Text Snippets</TabsTrigger>
+                <TabsTrigger value="text">Text</TabsTrigger>
+                <TabsTrigger value="buttons">Buttons</TabsTrigger>
               </TabsList>
               <div className="p-4">{renderLibraryContent()}</div>
             </Tabs>

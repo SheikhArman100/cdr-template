@@ -42,6 +42,12 @@ export interface TextSnippet {
   text: string;
 }
 
+export interface ButtonContent {
+  id: string;
+  text: string;
+  isDefault?: boolean;
+}
+
 export interface ContentContainerStyle {
   backgroundColor: string;
   borderColor: string;
@@ -50,7 +56,7 @@ export interface ContentContainerStyle {
 }
 
 export interface ContentItem {
-  type: 'QUESTION' | 'TEXT_SNIPPET';
+  type: 'QUESTION' | 'TEXT_SNIPPET' | 'BUTTON';
   id: string;
   width?: number;
   height?: number;
@@ -82,4 +88,5 @@ export interface Campaign {
   imageAssets?: ImageAsset[];
   questions?: Question[];
   textSnippets?: TextSnippet[];
+  buttons?: ButtonContent[];
 }

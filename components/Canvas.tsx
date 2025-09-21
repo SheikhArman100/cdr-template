@@ -20,7 +20,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { Step, ImageAsset, Question, TextSnippet, ContentItem } from '../types/campaign.types';
+import type { Step, ImageAsset, Question, TextSnippet, ButtonContent, ContentItem } from '../types/campaign.types';
 import { QuestionType } from '../types/campaign.types';
 import { XIcon } from './icons';
 
@@ -30,6 +30,7 @@ interface CanvasProps {
   imageAssets: ImageAsset[];
   questions: Question[];
   textSnippets: TextSnippet[];
+  buttons: ButtonContent[];
   onRemoveContent: (index: number) => void;
   onReorderContent: (dragIndex: number, hoverIndex: number) => void;
   onResizeContent: (index: number, size: { width: number; height: number }) => void;
@@ -40,6 +41,7 @@ interface CanvasItemProps {
   index: number;
   questions: Question[];
   textSnippets: TextSnippet[];
+  buttons: ButtonContent[];
   onRemoveContent: (index: number) => void;
   onReorderContent: (dragIndex: number, hoverIndex: number) => void;
   onResizeContent: (index: number, size: { width: number; height: number }) => void;
@@ -65,7 +67,7 @@ const QuestionRenderer: React.FC<{ question: Question }> = ({ question }) => {
     }
 };
 
-const CanvasItem: React.FC<CanvasItemProps> = ({ item, index, questions, textSnippets, onRemoveContent, onReorderContent, onResizeContent }) => {
+const CanvasItem: React.FC<CanvasItemProps> = ({ item, index, questions, textSnippets, buttons, onRemoveContent, onReorderContent, onResizeContent }) => {
   const {
     attributes,
     listeners,
@@ -111,7 +113,11 @@ const CanvasItem: React.FC<CanvasItemProps> = ({ item, index, questions, textSni
 
   const content = item.type === 'QUESTION'
     ? questions.find(q => q.id === item.id)
-    : textSnippets.find(s => s.id === item.id);
+    : item.type === 'TEXT_SNIPPET'
+    ? textSnippets.find(s => s.id === item.id)
+    : item.type === 'BUTTON'
+    ? buttons.find(b => b.id === item.id)
+    : null;
 
   if (!content) return null;
 
@@ -141,6 +147,15 @@ const CanvasItem: React.FC<CanvasItemProps> = ({ item, index, questions, textSni
         <div className="p-2 space-y-2">
           <label className="font-semibold text-sm">{content.text}</label>
           <QuestionRenderer question={content as Question} />
+        </div>
+      );
+    }
+    if (item.type === 'BUTTON' && 'text' in content) {
+      return (
+        <div className="p-2">
+          <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+            {content.text}
+          </button>
         </div>
       );
     }
@@ -175,7 +190,7 @@ const CanvasItem: React.FC<CanvasItemProps> = ({ item, index, questions, textSni
   );
 };
 
-export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, textSnippets, onRemoveContent, onReorderContent, onResizeContent }) => {
+export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, textSnippets, buttons, onRemoveContent, onReorderContent, onResizeContent }) => {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -240,6 +255,7 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
                 item={item}
                 questions={questions}
                 textSnippets={textSnippets}
+                buttons={buttons}
                 onRemoveContent={onRemoveContent}
                 onReorderContent={onReorderContent}
                 onResizeContent={onResizeContent}
