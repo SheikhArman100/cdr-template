@@ -96,6 +96,7 @@ export default function CreateCampaign() {
         if (draft.imageAssets) setImageAssets(draft.imageAssets);
         if (draft.questions) setQuestions(draft.questions);
         if (draft.textSnippets) setTextSnippets(draft.textSnippets);
+        if (draft.buttons) setButtons(draft.buttons);
       } else {
         // Create new campaign - no draft available
         const newCampaign = {
@@ -147,6 +148,7 @@ export default function CreateCampaign() {
           imageAssets,
           questions,
           textSnippets,
+          buttons,
         };
 
         saveDraftCampaign(campaignWithAssets);
@@ -155,7 +157,7 @@ export default function CreateCampaign() {
 
       return () => clearTimeout(timeoutId);
     }
-  }, [currentCampaign, imageAssets, questions, textSnippets]);
+  }, [currentCampaign, imageAssets, questions, textSnippets, buttons]);
 
   const selectedStep = currentCampaign?.steps.find(step => step.id === selectedStepId) || undefined;
 
@@ -330,6 +332,7 @@ export default function CreateCampaign() {
         imageAssets,
         questions,
         textSnippets,
+        buttons,
       };
 
       // Create campaign via API

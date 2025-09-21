@@ -94,6 +94,10 @@ export default function CampaignDetail() {
         console.log('Loading textSnippets:', campaign.textSnippets);
         setTextSnippets(campaign.textSnippets);
       }
+      if (campaign.buttons) {
+        console.log('Loading buttons:', campaign.buttons);
+        setButtons(campaign.buttons);
+      }
 
       setSelectedStepId(campaign.steps[0]?.id || null);
     }
@@ -173,6 +177,7 @@ export default function CampaignDetail() {
           imageAssets,
           questions,
           textSnippets,
+          buttons,
         },
       });
 
