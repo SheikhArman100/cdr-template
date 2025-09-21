@@ -46,11 +46,19 @@ const QuestionForm: React.FC<{
         type: QuestionType.DROPDOWN,
         options: options.filter(opt => opt.trim()),
       };
-    } else {
+    } else if (type === QuestionType.DATE) {
       newQuestion = {
         id: question?.id || `q-${Date.now()}`,
         text: text.trim(),
         type: QuestionType.DATE,
+        placeholder: placeholder.trim() || undefined,
+      };
+    } else {
+      // SIGN type
+      newQuestion = {
+        id: question?.id || `q-${Date.now()}`,
+        text: text.trim(),
+        type: QuestionType.SIGN,
         placeholder: placeholder.trim() || undefined,
       };
     }
@@ -97,11 +105,12 @@ const QuestionForm: React.FC<{
                 <SelectItem value={QuestionType.TEXT}>Text Input</SelectItem>
                 <SelectItem value={QuestionType.DROPDOWN}>Dropdown</SelectItem>
                 <SelectItem value={QuestionType.DATE}>Date Picker</SelectItem>
+                <SelectItem value={QuestionType.SIGN}>Signature</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {type === QuestionType.TEXT && (
+          {(type === QuestionType.TEXT || type === QuestionType.SIGN) && (
             <div className="space-y-2">
               <Label htmlFor="placeholder-text">Placeholder Text</Label>
               <Input
@@ -109,7 +118,7 @@ const QuestionForm: React.FC<{
                 type="text"
                 value={placeholder}
                 onChange={(e) => setPlaceholder(e.target.value)}
-                placeholder="Enter placeholder text"
+                placeholder={type === QuestionType.SIGN ? "Enter signature placeholder (e.g., 'Please sign here')" : "Enter placeholder text"}
               />
             </div>
           )}

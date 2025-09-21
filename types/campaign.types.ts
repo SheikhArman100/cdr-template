@@ -3,6 +3,7 @@ export enum QuestionType {
   TEXT = 'TEXT',
   DROPDOWN = 'DROPDOWN',
   DATE = 'DATE',
+  SIGN = 'SIGN',
 }
 
 export interface ImageAsset {
@@ -33,8 +34,15 @@ export interface DateQuestion {
   placeholder?: string;
 }
 
+export interface SignQuestion {
+  id: string;
+  text: string;
+  type: QuestionType.SIGN;
+  placeholder?: string;
+}
+
 // Union type for any question
-export type Question = TextQuestion | DropdownQuestion | DateQuestion;
+export type Question = TextQuestion | DropdownQuestion | DateQuestion | SignQuestion;
 
 export interface TextSnippet {
   id: string;

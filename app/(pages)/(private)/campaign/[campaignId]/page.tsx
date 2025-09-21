@@ -23,6 +23,7 @@ const initialQuestions: Question[] = [
   { id: 'q-1', text: 'What is your name?', type: QuestionType.TEXT, placeholder: 'Enter your full name' },
   { id: 'q-2', text: 'Which topic are you interested in?', type: QuestionType.DROPDOWN, options: ['Technology', 'Health', 'Science'] },
   { id: 'q-3', text: 'What is your date of birth?', type: QuestionType.DATE },
+  { id: 'q-4', text: 'Please provide your signature', type: QuestionType.SIGN, placeholder: 'Sign here' },
 ];
 
 const initialTextSnippets: TextSnippet[] = [

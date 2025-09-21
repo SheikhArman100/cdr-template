@@ -62,6 +62,14 @@ const QuestionRenderer: React.FC<{ question: Question }> = ({ question }) => {
             );
         case QuestionType.DATE:
             return <input type="date" className="w-full p-2 border border-gray-300 rounded-md" readOnly />;
+        case QuestionType.SIGN:
+            return (
+                <div className="w-full h-32 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center bg-gray-50">
+                    <span className="text-gray-500 text-sm">
+                        {'placeholder' in question && question.placeholder ? question.placeholder : 'Signature Area'}
+                    </span>
+                </div>
+            );
         default:
             return null;
     }
