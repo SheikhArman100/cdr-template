@@ -18,8 +18,8 @@ let mockCampaigns: Campaign[] = [
           textColor: '#000000',
         },
         contentItems: [
-          { type: 'TEXT_SNIPPET', id: 'ts-1', width: 450 },
-          { type: 'QUESTION', id: 'q-2', width: 450 }
+          { type: 'TEXT_SNIPPET', id: 'ts-1', width: 280 },
+          { type: 'QUESTION', id: 'q-2', width: 280 }
         ],
         logic: [
           { questionId: 'q-2', optionValue: 'Technology', nextStepId: 'step-2' }
@@ -57,7 +57,7 @@ let mockCampaigns: Campaign[] = [
           borderWidth: 3,
           textColor: '#1f2937',
         },
-        contentItems: [{ type: 'TEXT_SNIPPET', id: 'ts-1', width: 450 }],
+        contentItems: [{ type: 'TEXT_SNIPPET', id: 'ts-1', width: 280 }],
         logic: []
       }
     ],
