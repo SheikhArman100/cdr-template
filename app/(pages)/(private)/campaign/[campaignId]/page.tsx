@@ -68,7 +68,26 @@ export default function CampaignDetail() {
   // Load campaign data when fetched or when campaignId changes
   useEffect(() => {
     if (campaign && (!currentCampaign || currentCampaign.id !== campaign.id)) {
+      console.log('Loading campaign data:', campaign);
+      console.log('Campaign steps:', campaign.steps);
+      console.log('Campaign textSnippets:', campaign.textSnippets);
+
       setCurrentCampaign(campaign);
+
+      // Load assets from campaign if available
+      if (campaign.imageAssets) {
+        console.log('Loading imageAssets:', campaign.imageAssets);
+        setImageAssets(campaign.imageAssets);
+      }
+      if (campaign.questions) {
+        console.log('Loading questions:', campaign.questions);
+        setQuestions(campaign.questions);
+      }
+      if (campaign.textSnippets) {
+        console.log('Loading textSnippets:', campaign.textSnippets);
+        setTextSnippets(campaign.textSnippets);
+      }
+
       setSelectedStepId(campaign.steps[0]?.id || null);
     }
   }, [campaign, campaignId, currentCampaign?.id, setCurrentCampaign]);
@@ -132,6 +151,9 @@ export default function CampaignDetail() {
           name: currentCampaign.name,
           steps: currentCampaign.steps,
           lastModified: new Date().toISOString(),
+          imageAssets,
+          questions,
+          textSnippets,
         },
       });
 

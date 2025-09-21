@@ -308,6 +308,9 @@ export default function CreateCampaign() {
         userId: currentCampaign.userId,
         status: 'active' as const,
         steps: currentCampaign.steps,
+        imageAssets,
+        questions,
+        textSnippets,
       };
 
       // Create campaign via API
