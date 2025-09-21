@@ -196,6 +196,7 @@ export const useCampaignStore = create<CampaignState>()(
 
       removeContent: (stepId, index) =>
         set((state) => {
+          console.log('Removing content at index', index, 'from step', stepId);
           if (!state.currentCampaign) return state;
           const updatedSteps = state.currentCampaign.steps.map(s =>
             s.id === stepId

@@ -179,7 +179,12 @@ const CanvasItem: React.FC<CanvasItemProps> = ({ item, index, questions, textSni
       className="relative my-2 bg-transparent border border-dashed border-transparent hover:border-blue-400 group cursor-move"
     >
       <button
-        onClick={() => onRemoveContent(index)}
+        onClick={() => {
+          console.log('Button clicked for index', index);
+          onRemoveContent(index);
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+        data-no-dnd="true"
         className="absolute top-0 right-0 -m-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
         aria-label="Remove item"
       >
