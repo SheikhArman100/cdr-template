@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ImageAsset, Question, QuestionType, TextSnippet, ButtonContent } from '@/types/campaign.types';
-import { ArrowLeftIcon, DocumentTextIcon, PencilIcon, CheckIcon, PanelLeftIcon, PanelRightIcon, SaveIcon, RefreshCwIcon } from '@/components/icons';
+import { ArrowLeftIcon, PencilIcon, CheckIcon, PanelLeftIcon, PanelRightIcon, SaveIcon, RefreshCwIcon } from '@/components/icons';
 import { CampaignLeftPanel } from '@/components/CampaignLeftPanel';
 import { Canvas } from '@/components/Canvas';
 import { InspectorPanel } from '@/components/InspectorPanel';
@@ -59,7 +59,6 @@ export default function CreateCampaign() {
   const createCampaignMutation = useCreateCampaign();
 
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
-  const [isExporting, setIsExporting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
@@ -210,20 +209,7 @@ export default function CreateCampaign() {
     setButtons(prev => prev.filter(b => b.id !== buttonId));
   }, []);
 
-  const handleExportToPDF = useCallback(async () => {
-    setIsExporting(true);
-    try {
-      // Add 500ms loading effect
-      await new Promise(resolve => setTimeout(resolve, 500));
 
-      // PDF export logic would go here
-      console.log('Exporting campaign to PDF...');
-    } catch (error) {
-      console.error('Failed to export PDF:', error);
-    } finally {
-      setIsExporting(false);
-    }
-  }, []);
 
   // Wrapper functions for Canvas and InspectorPanel
   const handleRemoveContent = useCallback((index: number) => {
@@ -481,17 +467,7 @@ export default function CreateCampaign() {
             <SaveIcon className="w-4 h-4 mr-2" />
             {isSaving ? 'Saving...' : 'Save Campaign'}
           </Button>
-          <Button
-            onClick={handleExportToPDF}
-            disabled={isExporting}
-            variant="outline"
-            size="sm"
-          >
-            <DocumentTextIcon className="w-4 h-4" />
-            <span className='inline ml-2'>
-              {isExporting ? 'Exporting...' : 'Export to PDF'}
-            </span>
-          </Button>
+
         </div>
       </header>
 

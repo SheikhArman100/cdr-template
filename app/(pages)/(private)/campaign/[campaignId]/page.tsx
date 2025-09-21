@@ -203,19 +203,78 @@ export default function CampaignDetail() {
   }, [currentCampaign, router, updateCampaignMutation]);
 
   const handleExportToPDF = useCallback(async () => {
+    if (!currentCampaign || currentCampaign.steps.length === 0) {
+      console.error('No campaign or steps to export');
+      return;
+    }
+
     setIsExporting(true);
     try {
-      // Add 500ms loading effect
-      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('🎯 Starting PDF Export Process...');
+      console.log('📊 Campaign:', currentCampaign.name);
+      console.log('📄 Total Steps:', currentCampaign.steps.length);
 
-      // PDF export logic would go here
-      console.log('Exporting campaign to PDF...');
+      // Capture the full mobile device frame for PDF
+      const canvasElement = document.getElementById('campaign-canvas') as HTMLElement;
+
+      if (!canvasElement) {
+        console.error('❌ Canvas element not found - campaign-canvas ID not found');
+        return;
+      }
+
+      console.log('✅ Found full canvas element (with mobile wireframe):', canvasElement);
+      console.log('📋 Element details:');
+      console.log('- Tag:', canvasElement.tagName);
+      console.log('- Classes:', canvasElement.className);
+      console.log('- ID:', canvasElement.id);
+      console.log('- Attributes:', Array.from(canvasElement.attributes).map(attr => `${attr.name}="${attr.value}"`));
+      console.log('🎯 PDF will include complete mobile device frame');
+
+      // Process each step and log its HTML content
+      for (let i = 0; i < currentCampaign.steps.length; i++) {
+        const step = currentCampaign.steps[i];
+        console.log(`\n📄 ===== STEP ${i + 1}: ${step.name} =====`);
+
+        // Update the selected step to simulate step selection
+        setSelectedStepId(step.id);
+
+        // Wait for React to update the UI
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Get the current HTML content of the canvas
+        const currentCanvasHTML = canvasElement.innerHTML;
+        const currentCanvasText = canvasElement.textContent || '';
+
+        console.log('🔍 Canvas HTML Content:');
+        console.log(currentCanvasHTML);
+
+        console.log('📝 Canvas Text Content:');
+        console.log(currentCanvasText);
+
+        console.log('🏷️  Step Details:');
+        console.log('- Name:', step.name);
+        console.log('- Background Asset ID:', step.backgroundAssetId);
+        console.log('- Content Items:', step.contentItems.length);
+        console.log('- Content Items Details:', step.contentItems);
+
+        // Log background image if exists
+        if (step.backgroundAssetId) {
+          const bgImage = imageAssets.find(img => img.id === step.backgroundAssetId);
+          console.log('- Background Image:', bgImage);
+        }
+
+        console.log(`✅ ===== END STEP ${i + 1} =====\n`);
+      }
+
+      console.log('🎉 HTML Content Logging Complete!');
+      console.log('💡 This HTML content will be converted to PDF in the future.');
+
     } catch (error) {
-      console.error('Failed to export PDF:', error);
+      console.error('❌ Failed to log HTML content:', error);
     } finally {
       setIsExporting(false);
     }
-  }, []);
+  }, [currentCampaign, imageAssets]);
 
   // Wrapper functions for Canvas and InspectorPanel
   const handleRemoveContent = useCallback((index: number) => {

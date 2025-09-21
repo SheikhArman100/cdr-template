@@ -234,7 +234,7 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
   console.log('Found background image:', backgroundImage);
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-gray-100 p-8 overflow-y-auto overflow-x-hidden h-full">
+    <div id="campaign-canvas" className="flex-1 flex items-center justify-center bg-gray-100 p-8 overflow-y-auto overflow-x-hidden h-full">
       {/* Mobile Device Frame */}
       <div className="relative w-80 h-[600px] bg-black rounded-[2.5rem] p-2 shadow-2xl">
         {/* Device Screen */}
@@ -255,6 +255,7 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
 
           {/* Campaign Content Area */}
           <div
+            id="campaign-content-area"
             className="flex-1 overflow-y-auto overflow-x-hidden h-[calc(100%-1.5rem)] p-3 flex justify-center items-center"
             style={{
               backgroundImage: backgroundImage ? `url(${backgroundImage.url})` : 'none',
