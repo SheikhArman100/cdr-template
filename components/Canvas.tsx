@@ -229,54 +229,86 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
   console.log('Found background image:', backgroundImage);
 
   return (
-    <div
-      className="flex-1 p-8 bg-gray-200 overflow-y-auto overflow-x-hidden h-full"
-      style={{
-        backgroundImage: backgroundImage ? `url(${backgroundImage.url})` : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      <div
-        className="p-8 rounded-lg shadow-2xl space-y-4 max-w-2xl w-full mx-auto"
-        style={{
-          backgroundColor: step.contentContainerStyle.backgroundColor,
-          borderColor: step.contentContainerStyle.borderColor,
-          borderWidth: `${step.contentContainerStyle.borderWidth}px`,
-          color: step.contentContainerStyle.textColor,
-          borderStyle: 'solid',
-        }}
-      >
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={step.contentItems.map((item, index) => `${item.id}-${index}`)}
-            strategy={verticalListSortingStrategy}
-          >
-            {step.contentItems.map((item, index) => (
-              <CanvasItem
-                key={`${item.id}-${index}`}
-                index={index}
-                item={item}
-                questions={questions}
-                textSnippets={textSnippets}
-                buttons={buttons}
-                onRemoveContent={onRemoveContent}
-                onReorderContent={onReorderContent}
-                onResizeContent={onResizeContent}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
-        {step.contentItems.length === 0 && (
-          <div className="text-center py-12 border-2 border-dashed border-gray-400/50 rounded-lg">
-            <p>This step is empty.</p>
-            <p className="text-sm text-gray-500/80">Add content from the Library panel.</p>
+    <div className="flex-1 flex items-center justify-center bg-gray-100 p-8 overflow-y-auto overflow-x-hidden h-full">
+      {/* Mobile Device Frame */}
+      <div className="relative w-80 h-[600px] bg-black rounded-[2.5rem] p-2 shadow-2xl">
+        {/* Device Screen */}
+        <div className="w-full h-full bg-white rounded-[2rem] overflow-hidden relative">
+          {/* Status Bar */}
+          <div className="h-6 bg-black text-white text-xs flex items-center justify-between px-4">
+            <span>9:41</span>
+            <div className="flex items-center space-x-1">
+              <div className="w-4 h-2 bg-white rounded-sm"></div>
+              <div className="w-4 h-2 bg-white rounded-sm"></div>
+              <div className="w-4 h-2 bg-white rounded-sm"></div>
+            </div>
+            <div className="flex items-center space-x-1">
+              <span>100%</span>
+              <div className="w-4 h-2 bg-white rounded-sm"></div>
+            </div>
           </div>
-        )}
+
+          {/* Campaign Content Area */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden h-[calc(100%-1.5rem)]">
+            <div
+              className="p-4 space-y-4 min-h-full relative"
+              style={{
+                backgroundColor: backgroundImage ? 'transparent' : step.contentContainerStyle.backgroundColor,
+                backgroundImage: backgroundImage ? `url(${backgroundImage.url})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                borderColor: step.contentContainerStyle.borderColor,
+                borderWidth: `${step.contentContainerStyle.borderWidth}px`,
+                color: step.contentContainerStyle.textColor,
+                borderStyle: 'solid',
+              }}
+            >
+              {/* Semi-transparent overlay for better text readability */}
+              {backgroundImage && (
+                <div
+                  className="absolute inset-0 bg-white/20 pointer-events-none"
+                  style={{ zIndex: 1 }}
+                />
+              )}
+              {/* Content wrapper to ensure proper layering */}
+              <div className="relative z-10">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={step.contentItems.map((item, index) => `${item.id}-${index}`)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {step.contentItems.map((item, index) => (
+                    <CanvasItem
+                      key={`${item.id}-${index}`}
+                      index={index}
+                      item={item}
+                      questions={questions}
+                      textSnippets={textSnippets}
+                      buttons={buttons}
+                      onRemoveContent={onRemoveContent}
+                      onReorderContent={onReorderContent}
+                      onResizeContent={onResizeContent}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+              {step.contentItems.length === 0 && (
+                <div className="text-center py-12 border-2 border-dashed border-gray-400/50 rounded-lg">
+                  <p>This step is empty.</p>
+                  <p className="text-sm text-gray-500/80">Add content from the Library panel.</p>
+                </div>
+              )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Home Indicator */}
+        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-black rounded-full"></div>
       </div>
     </div>
   );
