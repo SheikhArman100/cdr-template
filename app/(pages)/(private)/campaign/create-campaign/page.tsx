@@ -320,6 +320,10 @@ export default function CreateCampaign() {
 
       // Campaign saved successfully
 
+      // Clear draft campaign from store
+      const { clearDraft } = useCampaignStore.getState();
+      clearDraft();
+
       // Clear current campaign
       setCurrentCampaign(null);
 

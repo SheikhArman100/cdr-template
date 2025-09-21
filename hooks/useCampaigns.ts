@@ -39,6 +39,7 @@ export function useCreateCampaign() {
       queryClient.refetchQueries({ queryKey: campaignKeys.all });
       // Add to cache
       queryClient.setQueryData(campaignKeys.detail(newCampaign.id), newCampaign);
+      console.log("New Campaign", newCampaign)
     },
   });
 }
