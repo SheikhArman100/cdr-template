@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import type { TextSnippet } from '../types/campaign.types';
 import { PlusIcon, PencilIcon, TrashIcon, CheckIcon } from './icons';
 import { Button } from './ui/button';
@@ -22,6 +22,42 @@ const TextSnippetForm: React.FC<{
 }> = ({ snippet, onSave, onCancel }) => {
   const [name, setName] = useState(snippet?.name || '');
   const [text, setText] = useState(snippet?.text || '');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const insertTag = (tag: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = text.substring(start, end);
+    const beforeText = text.substring(0, start);
+    const afterText = text.substring(end);
+
+    let newText: string;
+    let insertedText: string;
+
+    if (selectedText) {
+      // Wrap selected text
+      insertedText = selectedText;
+      newText = `${beforeText}<${tag}>${selectedText}</${tag}>${afterText}`;
+    } else {
+      // Insert at cursor with placeholder
+      insertedText = tag.startsWith('h') ? `Heading ${tag.slice(1)}` : 'Paragraph text';
+      newText = `${beforeText}<${tag}>${insertedText}</${tag}>${afterText}`;
+    }
+
+    setText(newText);
+
+    // Set cursor position after the inserted tag
+    setTimeout(() => {
+      if (textarea) {
+        const newCursorPos = start + `<${tag}>`.length + insertedText.length;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+        textarea.focus();
+      }
+    }, 0);
+  };
 
   const handleSave = () => {
     if (!name.trim() || !text.trim()) return;
@@ -52,20 +88,96 @@ const TextSnippetForm: React.FC<{
 
           <div className="space-y-2">
             <Label htmlFor="snippet-text">Snippet Text</Label>
+
+            {/* Formatting Toolbar */}
+            <div className="flex flex-wrap gap-1 p-2 bg-muted rounded-md border">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertTag('h1')}
+                className="h-7 px-2 text-xs"
+                title="Heading 1"
+              >
+                H1
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertTag('h2')}
+                className="h-7 px-2 text-xs"
+                title="Heading 2"
+              >
+                H2
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertTag('h3')}
+                className="h-7 px-2 text-xs"
+                title="Heading 3"
+              >
+                H3
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertTag('h4')}
+                className="h-7 px-2 text-xs"
+                title="Heading 4"
+              >
+                H4
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertTag('h5')}
+                className="h-7 px-2 text-xs"
+                title="Heading 5"
+              >
+                H5
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertTag('h6')}
+                className="h-7 px-2 text-xs"
+                title="Heading 6"
+              >
+                H6
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insertTag('p')}
+                className="h-7 px-2 text-xs"
+                title="Paragraph"
+              >
+                P
+              </Button>
+            </div>
+
             <Textarea
+              ref={textareaRef}
               id="snippet-text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              rows={4}
-              placeholder="Enter the text content for this snippet"
+              rows={6}
+              placeholder="Enter the text content for this snippet. Use the buttons above to add formatting."
             />
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button onClick={onCancel} variant="outline">
+            <Button type="button" onClick={onCancel} variant="outline">
               Cancel
             </Button>
-            <Button onClick={handleSave} variant="primary">
+            <Button type="button" onClick={handleSave} variant="primary">
               {snippet ? 'Update' : 'Add'} Snippet
             </Button>
           </div>

@@ -84,6 +84,11 @@ export default function CreateCampaign() {
       if (draft) {
         // Load existing draft campaign
         setCurrentCampaign(draft);
+
+        // Load assets from draft if available
+        if (draft.imageAssets) setImageAssets(draft.imageAssets);
+        if (draft.questions) setQuestions(draft.questions);
+        if (draft.textSnippets) setTextSnippets(draft.textSnippets);
       } else {
         // Create new campaign - no draft available
         const newCampaign = {
@@ -107,6 +112,9 @@ export default function CreateCampaign() {
               logic: [],
             },
           ],
+          imageAssets: initialImageAssets,
+          questions: initialQuestions,
+          textSnippets: initialTextSnippets,
         };
         setCurrentCampaign(newCampaign);
       }
@@ -125,13 +133,22 @@ export default function CreateCampaign() {
     if (currentCampaign) {
       const timeoutId = setTimeout(() => {
         const { saveDraftCampaign } = useCampaignStore.getState();
-        saveDraftCampaign(currentCampaign);
+
+        // Include current assets in the campaign before saving
+        const campaignWithAssets = {
+          ...currentCampaign,
+          imageAssets,
+          questions,
+          textSnippets,
+        };
+
+        saveDraftCampaign(campaignWithAssets);
         setLastSaved(new Date().toLocaleString());
       }, 10);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [currentCampaign]);
+  }, [currentCampaign, imageAssets, questions, textSnippets]);
 
   const selectedStep = currentCampaign?.steps.find(step => step.id === selectedStepId) || undefined;
 
@@ -255,6 +272,9 @@ export default function CreateCampaign() {
             logic: [],
           },
         ],
+        imageAssets: initialImageAssets,
+        questions: initialQuestions,
+        textSnippets: initialTextSnippets,
       };
 
       // Set the new campaign

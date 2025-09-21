@@ -78,4 +78,8 @@ export interface Campaign {
   steps: Step[];
   lastModified: string;
   status: 'active' | 'inactive';
+  // Global assets for the campaign
+  imageAssets?: ImageAsset[];
+  questions?: Question[];
+  textSnippets?: TextSnippet[];
 }

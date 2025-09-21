@@ -117,7 +117,24 @@ const CanvasItem: React.FC<CanvasItemProps> = ({ item, index, questions, textSni
 
   const renderContent = () => {
     if (item.type === 'TEXT_SNIPPET' && 'text' in content) {
-      return <p className="whitespace-pre-wrap p-2">{content.text}</p>;
+      // Add basic styling for HTML elements
+      const styledHtml = content.text
+        .replace(/<h1>/gi, '<h1 style="font-size: 2em; font-weight: bold; margin: 0.5em 0;">')
+        .replace(/<\/h1>/gi, '</h1>')
+        .replace(/<h2>/gi, '<h2 style="font-size: 1.5em; font-weight: bold; margin: 0.4em 0;">')
+        .replace(/<\/h2>/gi, '</h2>')
+        .replace(/<h3>/gi, '<h3 style="font-size: 1.25em; font-weight: bold; margin: 0.3em 0;">')
+        .replace(/<\/h3>/gi, '</h3>')
+        .replace(/<h4>/gi, '<h4 style="font-size: 1.1em; font-weight: bold; margin: 0.25em 0;">')
+        .replace(/<\/h4>/gi, '</h4>')
+        .replace(/<h5>/gi, '<h5 style="font-size: 1em; font-weight: bold; margin: 0.2em 0;">')
+        .replace(/<\/h5>/gi, '</h5>')
+        .replace(/<h6>/gi, '<h6 style="font-size: 0.9em; font-weight: bold; margin: 0.15em 0;">')
+        .replace(/<\/h6>/gi, '</h6>')
+        .replace(/<p>/gi, '<p style="margin: 0.5em 0; line-height: 1.4;">')
+        .replace(/<\/p>/gi, '</p>');
+
+      return <div className="p-2" dangerouslySetInnerHTML={{ __html: styledHtml }} />;
     }
     if (item.type === 'QUESTION') {
       return (
