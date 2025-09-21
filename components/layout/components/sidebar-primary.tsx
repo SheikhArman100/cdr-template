@@ -56,8 +56,8 @@ const menuItems = [
   {
     icon: UserCircle,
     tooltip: 'Profile',
-    path: '/profile',
-    rootPath: '/profile',
+    path: '#',
+    rootPath: '#',
   },
   {
     icon: BarChart3,
@@ -68,8 +68,8 @@ const menuItems = [
   {
     icon: Settings,
     tooltip: 'Account',
-    path: '/account',
-    rootPath: '/account',
+    path: '#',
+    rootPath: '#',
   },
 ];
 

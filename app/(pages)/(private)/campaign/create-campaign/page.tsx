@@ -75,37 +75,41 @@ export default function CreateCampaign() {
     }
   }, [currentUserId, setCurrentUserId]);
 
-  // Always create fresh campaign - clear any existing state
+  // Load from draft if available, otherwise create fresh campaign
   useEffect(() => {
     if (currentUserId) {
-      // Clear any existing campaign and drafts for this user to ensure fresh start
-      const { clearDraft } = useCampaignStore.getState();
-      clearDraft();
+      const { getDraftCampaign } = useCampaignStore.getState();
+      const draft = getDraftCampaign();
 
-      // Always create new campaign - no draft recovery
-      const newCampaign = {
-        id: `campaign-${Date.now()}`,
-        name: 'New Campaign',
-        userId: currentUserId,
-        status: 'inactive' as const,
-        lastModified: new Date().toISOString(),
-        steps: [
-          {
-            id: `step-${Date.now()}`,
-            name: 'Welcome Screen',
-            backgroundAssetId: null,
-            contentContainerStyle: {
-              backgroundColor: 'rgba(255, 255, 255, 0.8)',
-              borderColor: '#000000',
-              borderWidth: 2,
-              textColor: '#000000',
+      if (draft) {
+        // Load existing draft campaign
+        setCurrentCampaign(draft);
+      } else {
+        // Create new campaign - no draft available
+        const newCampaign = {
+          id: `campaign-${Date.now()}`,
+          name: 'New Campaign',
+          userId: currentUserId,
+          status: 'inactive' as const,
+          lastModified: new Date().toISOString(),
+          steps: [
+            {
+              id: `step-${Date.now()}`,
+              name: 'Welcome Screen',
+              backgroundAssetId: null,
+              contentContainerStyle: {
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                borderColor: '#000000',
+                borderWidth: 2,
+                textColor: '#000000',
+              },
+              contentItems: [],
+              logic: [],
             },
-            contentItems: [],
-            logic: [],
-          },
-        ],
-      };
-      setCurrentCampaign(newCampaign);
+          ],
+        };
+        setCurrentCampaign(newCampaign);
+      }
     }
   }, [currentUserId, setCurrentCampaign]);
 
@@ -123,7 +127,7 @@ export default function CreateCampaign() {
         const { saveDraftCampaign } = useCampaignStore.getState();
         saveDraftCampaign(currentCampaign);
         setLastSaved(new Date().toLocaleString());
-      }, 1000);
+      }, 10);
 
       return () => clearTimeout(timeoutId);
     }
@@ -225,8 +229,36 @@ export default function CreateCampaign() {
       // Add 500ms loading effect
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Clear current campaign to trigger fresh campaign creation
-      setCurrentCampaign(null);
+      // Clear draft campaign from store
+      const { clearDraft } = useCampaignStore.getState();
+      clearDraft();
+
+      // Create new fresh campaign directly
+      const newCampaign = {
+        id: `campaign-${Date.now()}`,
+        name: 'New Campaign',
+        userId: currentUserId!,
+        status: 'inactive' as const,
+        lastModified: new Date().toISOString(),
+        steps: [
+          {
+            id: `step-${Date.now()}`,
+            name: 'Welcome Screen',
+            backgroundAssetId: null,
+            contentContainerStyle: {
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              borderColor: '#000000',
+              borderWidth: 2,
+              textColor: '#000000',
+            },
+            contentItems: [],
+            logic: [],
+          },
+        ],
+      };
+
+      // Set the new campaign
+      setCurrentCampaign(newCampaign);
 
       // Reset selected step
       setSelectedStepId(null);
@@ -240,7 +272,7 @@ export default function CreateCampaign() {
     } finally {
       setIsResetting(false);
     }
-  }, [currentCampaign, setCurrentCampaign]);
+  }, [currentCampaign, currentUserId, setCurrentCampaign]);
 
   const handleSaveCampaign = useCallback(async () => {
     if (!currentCampaign) return;
