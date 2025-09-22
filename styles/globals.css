@@ -92,32 +92,32 @@
 
 /** Theme Setup **/
 @theme inline {
-  /** Base Colors **/
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
+  /** Base Colors - Direct HSL Values **/
+  --color-background: hsl(0, 0%, 100%);
+  --color-foreground: hsl(224, 71%, 4%);
+  --color-card: hsl(0, 0%, 100%);
+  --color-card-foreground: hsl(224, 71%, 4%);
+  --color-popover: hsl(0, 0%, 100%);
+  --color-popover-foreground: hsl(224, 71%, 4%);
+  --color-muted: hsl(210, 40%, 96%);
+  --color-muted-foreground: hsl(214, 13%, 40%);
+  --color-accent: hsl(210, 40%, 96%);
+  --color-accent-foreground: hsl(221, 39%, 11%);
+  --color-primary: hsl(221, 39%, 11%);
+  --color-primary-foreground: hsl(0, 0%, 100%);
+  --color-secondary: hsl(210, 40%, 96%);
+  --color-secondary-foreground: hsl(221, 39%, 11%);
+  --color-destructive: hsl(0, 84%, 60%);
+  --color-destructive-foreground: hsl(0, 0%, 100%);
 
   /** Base Styles **/
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --color-border: hsl(240, 5.9%, 90%);
+  --color-input: hsl(213, 27%, 84%);
+  --color-ring: hsl(213, 19%, 52%);
+  --radius-xl: calc(0.5rem + 4px);
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
 
   /** Animations **/
   --animate-marquee: marquee var(--duration) infinite linear;

@@ -153,8 +153,8 @@ export async function exportCampaignToPDF(
       onclone: (clonedDoc) => {
         const style = clonedDoc.createElement('style');
         style.textContent = `
-          * { 
-            border-color: #e4e4e7 !important; 
+          * {
+            border-color: #e4e4e7 !important;
             color: #09090b !important;
           }
           .status-bar,
@@ -165,6 +165,55 @@ export async function exportCampaignToPDF(
             visibility: visible !important;
             opacity: 1 !important;
             display: block !important;
+          }
+
+          /* Override all component colors for PDF export */
+          [data-radix-calendar],
+          [data-radix-calendar] *,
+          [data-slot="datefield"],
+          [data-slot="datefield"] *,
+          [data-slot="input"],
+          [data-slot="input"] *,
+          [data-slot="select"],
+          [data-slot="select"] *,
+          [data-slot="select-trigger"],
+          [data-slot="select-trigger"] *,
+          [data-slot="select-content"],
+          [data-slot="select-content"] *,
+          [data-slot="select-item"],
+          [data-slot="select-item"] *,
+          [data-slot="input-addon"],
+          [data-slot="input-addon"] *,
+          [role="group"][aria-label],
+          [role="group"][aria-label] *,
+          [data-segment],
+          [data-segment]:focus,
+          [data-segment]:hover,
+          [data-placeholder],
+          [data-placeholder]:focus,
+          [data-placeholder]:hover {
+            border-color: #e4e4e7 !important;
+            background-color: #ffffff !important;
+            color: #09090b !important;
+            fill: #09090b !important;
+            stroke: #e4e4e7 !important;
+            outline: none !important;
+            box-shadow: none !important;
+          }
+
+          /* Ensure all input elements use safe colors */
+          input,
+          input:focus,
+          input:hover,
+          select,
+          select:focus,
+          select:hover,
+          input[type="date"],
+          input[type="date"]:focus,
+          input[type="date"]:hover {
+            border-color: #e4e4e7 !important;
+            background-color: #ffffff !important;
+            color: #09090b !important;
           }
         `;
         clonedDoc.head.appendChild(style);
@@ -213,4 +262,3 @@ export async function exportCampaignToPDF(
   pdf.save(fileName);
   return;
 }
-    

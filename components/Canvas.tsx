@@ -23,6 +23,11 @@ import { CSS } from '@dnd-kit/utilities';
 import type { Step, ImageAsset, Question, TextSnippet, ButtonContent, ContentItem } from '../types/campaign.types';
 import { QuestionType } from '../types/campaign.types';
 import { XIcon } from './icons';
+import { Input, InputAddon, InputGroup } from './ui/input';
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { CalendarDays } from 'lucide-react';
+import { DateField, DateInput } from './ui/datefield';
 
 
 interface CanvasProps {
@@ -49,30 +54,85 @@ interface CanvasItemProps {
 
 const ItemType = 'CanvasItem';
 
+// const QuestionRenderer: React.FC<{ question: Question }> = ({ question }) => {
+//     switch (question.type) {
+//         case QuestionType.TEXT:
+//             return <input type="text" placeholder={'placeholder' in question ? question.placeholder || 'Your answer...' : 'Your answer...'} className="w-full p-2 border border-gray-300 rounded-md" readOnly />;
+//         case QuestionType.DROPDOWN:
+//             return (
+//                 <select className="w-full p-2 border border-gray-300 rounded-md bg-white">
+//                     <option value="">Select an option</option>
+//                     {'options' in question && question.options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
+//                 </select>
+//             );
+//         case QuestionType.DATE:
+//             return <input type="date" className="w-full p-2 border border-gray-300 rounded-md" readOnly />;
+//         case QuestionType.SIGN:
+//             return (
+//                 <div className="w-full h-32 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center bg-gray-50">
+//                     <span className="text-gray-500 text-sm">
+//                         {'placeholder' in question && question.placeholder ? question.placeholder : 'Signature Area'}
+//                     </span>
+//                 </div>
+//             );
+//         default:
+//             return null;
+//     }
+// };
+
 const QuestionRenderer: React.FC<{ question: Question }> = ({ question }) => {
-    switch (question.type) {
-        case QuestionType.TEXT:
-            return <input type="text" placeholder={'placeholder' in question ? question.placeholder || 'Your answer...' : 'Your answer...'} className="w-full p-2 border border-gray-300 rounded-md" readOnly />;
-        case QuestionType.DROPDOWN:
-            return (
-                <select className="w-full p-2 border border-gray-300 rounded-md bg-white">
-                    <option value="">Select an option</option>
-                    {'options' in question && question.options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
-                </select>
-            );
-        case QuestionType.DATE:
-            return <input type="date" className="w-full p-2 border border-gray-300 rounded-md" readOnly />;
-        case QuestionType.SIGN:
-            return (
-                <div className="w-full h-32 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center bg-gray-50">
-                    <span className="text-gray-500 text-sm">
-                        {'placeholder' in question && question.placeholder ? question.placeholder : 'Signature Area'}
-                    </span>
-                </div>
-            );
-        default:
-            return null;
-    }
+  switch (question.type) {
+    case QuestionType.TEXT:
+      return (
+        <Input
+          placeholder={
+            'placeholder' in question
+              ? question.placeholder || 'Your answer...'
+              : 'Your answer...'
+          }
+          className="w-full"
+        />
+      );
+    case QuestionType.DROPDOWN:
+      return (
+        <Select>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select an option" />
+          </SelectTrigger>
+          <SelectContent>
+            {'options' in question &&
+              question.options.map((opt: string) => (
+                <SelectItem key={opt} value={opt}>
+                  {opt}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+      );
+    case QuestionType.DATE:
+      return (
+        <InputGroup>
+          <InputAddon mode="icon">
+            <CalendarDays />
+          </InputAddon>
+          <DateField>
+            <DateInput />
+          </DateField>
+        </InputGroup>
+      );
+    case QuestionType.SIGN:
+      return (
+        <div className="w-full h-32 border-2 border-dashed border-border rounded-md flex items-center justify-center bg-background">
+          <span className="text-muted-foreground text-sm">
+            {'placeholder' in question && question.placeholder
+              ? question.placeholder
+              : 'Signature Area'}
+          </span>
+        </div>
+      );
+    default:
+      return null;
+  }
 };
 
 const CanvasItem: React.FC<CanvasItemProps> = ({ item, index, questions, textSnippets, buttons, onRemoveContent, onReorderContent, onResizeContent }) => {
