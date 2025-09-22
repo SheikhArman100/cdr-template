@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Campaign, Step, ContentItem, ContentContainerStyle } from '@/types/campaign.types';
+import { toast } from 'sonner';
 
 // Default campaigns that are available for everyone
 const defaultCampaigns: Campaign[] = [
@@ -20,8 +21,8 @@ const defaultCampaigns: Campaign[] = [
           textColor: '#000000',
         },
         contentItems: [
-          { type: 'TEXT_SNIPPET', id: 'ts-1', width: 280 },
-          { type: 'QUESTION', id: 'q-2', width: 280 }
+          { type: 'TEXT_SNIPPET', id: 'ts-1', width: 280 }
+          
         ],
         logic: [
           { questionId: 'q-2', optionValue: 'Technology', nextStepId: 'step-2' }
@@ -303,6 +304,37 @@ export const useCampaignStore = create<CampaignState>()(
       addContent: (stepId, item) =>
         set((state) => {
           if (!state.currentCampaign) return state;
+
+          const step = state.currentCampaign.steps.find(s => s.id === stepId);
+          if (!step) return state;
+
+          // Estimate height for different content types
+          const getEstimatedHeight = (type: string) => {
+            switch (type) {
+              case 'QUESTION': return 80; // Label + input field
+              case 'TEXT_SNIPPET': return 60; // Text content
+              case 'BUTTON': return 50; // Button height
+              default: return 40;
+            }
+          };
+
+          // Calculate current total height
+          const currentHeight = step.contentItems.reduce((total, contentItem) => {
+            return total + (contentItem.height || getEstimatedHeight(contentItem.type));
+          }, 0);
+
+          // Available height in phone screen (rough estimate: 500px content area)
+          const maxHeight = 500;
+          const newItemHeight = getEstimatedHeight(item.type);
+
+          if (currentHeight + newItemHeight > maxHeight) {
+            // Show toast message when there's not enough space
+            toast.error('Not enough space', {
+              description: 'The campaign screen is full. Remove some content or go to next step.',
+            });
+            return state; // Don't add the item
+          }
+
           const updatedSteps = state.currentCampaign.steps.map(s =>
             s.id === stepId
               ? {

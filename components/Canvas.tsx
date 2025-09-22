@@ -54,31 +54,7 @@ interface CanvasItemProps {
 
 const ItemType = 'CanvasItem';
 
-// const QuestionRenderer: React.FC<{ question: Question }> = ({ question }) => {
-//     switch (question.type) {
-//         case QuestionType.TEXT:
-//             return <input type="text" placeholder={'placeholder' in question ? question.placeholder || 'Your answer...' : 'Your answer...'} className="w-full p-2 border border-gray-300 rounded-md" readOnly />;
-//         case QuestionType.DROPDOWN:
-//             return (
-//                 <select className="w-full p-2 border border-gray-300 rounded-md bg-white">
-//                     <option value="">Select an option</option>
-//                     {'options' in question && question.options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
-//                 </select>
-//             );
-//         case QuestionType.DATE:
-//             return <input type="date" className="w-full p-2 border border-gray-300 rounded-md" readOnly />;
-//         case QuestionType.SIGN:
-//             return (
-//                 <div className="w-full h-32 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center bg-gray-50">
-//                     <span className="text-gray-500 text-sm">
-//                         {'placeholder' in question && question.placeholder ? question.placeholder : 'Signature Area'}
-//                     </span>
-//                 </div>
-//             );
-//         default:
-//             return null;
-//     }
-// };
+
 
 const QuestionRenderer: React.FC<{ question: Question }> = ({ question }) => {
   switch (question.type) {
@@ -302,11 +278,11 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
   console.log('Found background image:', backgroundImage);
 
   return (
-    <div id="campaign-canvas" className="flex-1 flex items-center justify-center bg-gray-100 p-8 overflow-y-auto overflow-x-hidden h-full">
+    <div id="campaign-canvas" className="flex-1 flex items-start justify-center bg-gray-100 p-8 overflow-y-auto overflow-x-hidden h-full pt-20">
       {/* Mobile Device Frame */}
       <div className="relative w-80 h-[600px] bg-black rounded-[2.5rem] p-2 shadow-2xl">
         {/* Device Screen */}
-        <div className="w-full h-full bg-white rounded-[2rem] overflow-hidden relative">
+        <div className="w-full h-full bg-white rounded-[2rem] overflow-hidden relative ">
           {/* Status Bar */}
           <div className="h-6 bg-black text-white text-xs flex items-center justify-between px-4">
             <span>9:41</span>
@@ -324,7 +300,7 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
           {/* Campaign Content Area */}
           <div
             id="campaign-content-area"
-            className="flex-1 overflow-y-auto overflow-x-hidden h-[calc(100%-1.5rem)] p-3 flex justify-center items-center"
+            className="flex-1 overflow-y-auto overflow-x-hidden h-[calc(100%-1.5rem)] p-3 flex justify-center items-center "
             style={{
               backgroundImage: backgroundImage ? `url(${backgroundImage.url})` : 'none',
               backgroundSize: 'cover',
