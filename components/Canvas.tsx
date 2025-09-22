@@ -159,9 +159,17 @@ const CanvasItem: React.FC<CanvasItemProps> = ({ item, index, questions, textSni
       );
     }
     if (item.type === 'BUTTON' && 'text' in content) {
+      const buttonContent = content as ButtonContent;
       return (
         <div className="p-2">
-          <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+          <button
+            className="w-full px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
+            style={{
+              backgroundColor: buttonContent.backgroundColor || '#007bff',
+              color: buttonContent.textColor || '#ffffff',
+              border: `1px solid ${buttonContent.backgroundColor || '#007bff'}`
+            }}
+          >
             {content.text}
           </button>
         </div>
@@ -264,7 +272,7 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
             }}
           >
             <div
-              className="p-2 space-y-4 relative"
+              className="w-full p-2 space-y-4 relative"
               style={{
                 backgroundColor: step.contentContainerStyle.backgroundColor,
                 borderColor: step.contentContainerStyle.borderColor,

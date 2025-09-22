@@ -54,6 +54,8 @@ export interface ButtonContent {
   id: string;
   text: string;
   isDefault?: boolean;
+  backgroundColor?: string;
+  textColor?: string;
 }
 
 export interface ContentContainerStyle {
