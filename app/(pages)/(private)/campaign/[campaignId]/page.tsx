@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { exportCampaignToPDF } from '@/lib/utils';
 
 const initialImageAssets: ImageAsset[] = [
   { id: 'img-1', name: 'Mountain View', url: 'https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=2070&auto=format&fit=crop' },
@@ -78,27 +79,19 @@ export default function CampaignDetail() {
   // Load campaign data when fetched or when campaignId changes
   useEffect(() => {
     if (campaign && (!currentCampaign || currentCampaign.id !== campaign.id)) {
-      console.log('Loading campaign data:', campaign);
-      console.log('Campaign steps:', campaign.steps);
-      console.log('Campaign textSnippets:', campaign.textSnippets);
-
       setCurrentCampaign(campaign);
 
       // Load assets from campaign if available
       if (campaign.imageAssets) {
-        console.log('Loading imageAssets:', campaign.imageAssets);
         setImageAssets(campaign.imageAssets);
       }
       if (campaign.questions) {
-        console.log('Loading questions:', campaign.questions);
         setQuestions(campaign.questions);
       }
       if (campaign.textSnippets) {
-        console.log('Loading textSnippets:', campaign.textSnippets);
         setTextSnippets(campaign.textSnippets);
       }
       if (campaign.buttons) {
-        console.log('Loading buttons:', campaign.buttons);
         setButtons(campaign.buttons);
       }
 
@@ -195,7 +188,6 @@ export default function CampaignDetail() {
       // Redirect to campaign list
       router.push('/campaign');
     } catch (error) {
-      console.error('Failed to save campaign:', error);
       toast.error('Failed to save campaign', {
         description: 'Please try again or contact support if the problem persists.',
       });
@@ -205,241 +197,15 @@ export default function CampaignDetail() {
   }, [currentCampaign, router, updateCampaignMutation]);
 
 const handleExportToPDF = useCallback(async () => {
-  if (!currentCampaign || currentCampaign.steps.length === 0) {
-    console.error('No campaign or steps to export');
-    toast.error('No campaign steps to export');
-    return;
-  }
-
+  if (!currentCampaign) return;
+  
   setIsExporting(true);
-
   try {
-    console.log('🎯 Starting PDF Export Process...');
-    console.log('📊 Campaign:', currentCampaign.name);
-    console.log('📄 Total Steps:', currentCampaign.steps.length);
-
-    // Create PDF document
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-
-    // Process each step
-    for (let i = 0; i < currentCampaign.steps.length; i++) {
-      const step = currentCampaign.steps[i];
-      console.log(`\n📄 ===== Processing STEP ${i + 1}: ${step.name} =====`);
-
-      // Update the selected step to render the correct content
-      setSelectedStepId(step.id);
-
-      // Wait for React to update the UI and styles to apply
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Try to find the complete phone mockup container first
-      // Look for common phone mockup container classes/IDs
-      let targetElement = document.getElementById('campaign-canvas') as HTMLElement;
-      
-      // Try alternative selectors for phone mockup containers
-      const alternativeSelectors = [
-        '.phone-mockup',
-        '.device-mockup',
-        '.mobile-frame',
-        '.phone-container',
-        '[data-phone-mockup]',
-        '.mockup-phone'
-      ];
-      
-      // If campaign-canvas doesn't include the status bar, try to find the parent container
-      for (const selector of alternativeSelectors) {
-        const altElement = document.querySelector(selector) as HTMLElement;
-        if (altElement) {
-          // Check if this element contains the status bar elements
-          const hasStatusBar = altElement.querySelector('[class*="status"]') || 
-                               altElement.textContent?.includes('9:41') ||
-                               altElement.textContent?.includes('100%');
-          if (hasStatusBar) {
-            targetElement = altElement;
-            console.log(`📱 Found complete phone mockup: ${selector}`);
-            break;
-          }
-        }
-      }
-
-      if (!targetElement) {
-        console.error('❌ Target element not found');
-        continue;
-      }
-
-      // Get the original element's computed styles and dimensions
-      const computedStyle = window.getComputedStyle(targetElement);
-      const originalRect = targetElement.getBoundingClientRect();
-
-      // Clone the element and apply safe styles
-      const clonedElement = targetElement.cloneNode(true) as HTMLElement;
-      
-      // Preserve the original layout while making it capturable
-      clonedElement.style.cssText = `
-        position: absolute !important;
-        left: -9999px !important;
-        top: -9999px !important;
-        width: ${originalRect.width}px !important;
-        height: ${originalRect.height}px !important;
-        transform: none !important;
-        background: ${computedStyle.backgroundColor || '#ffffff'} !important;
-        overflow: visible !important;
-        z-index: -1 !important;
-        box-sizing: border-box !important;
-        margin: 0 !important;
-        padding: ${computedStyle.padding} !important;
-      `;
-
-      // Apply fallback styles to all elements in the cloned tree
-      const applyFallbackStyles = (element: HTMLElement) => {
-        // Preserve important layout properties
-        const originalStyle = window.getComputedStyle(element);
-        
-        // Apply safe colors while preserving layout
-        element.style.borderColor = element.style.borderColor || '#e4e4e7';
-        element.style.color = element.style.color || '#09090b';
-        
-        // Ensure visibility of status bar elements
-        if (element.textContent?.includes('9:41') || 
-            element.textContent?.includes('100%') || 
-            element.classList.contains('status-bar') ||
-            element.getAttribute('class')?.includes('status')) {
-          element.style.visibility = 'visible';
-          element.style.opacity = '1';
-          element.style.display = originalStyle.display === 'none' ? 'block' : originalStyle.display;
-        }
-
-        // Remove any inline styles that might contain problematic functions
-        const inlineStyle = element.getAttribute('style');
-        if (inlineStyle && (inlineStyle.includes('oklch') || inlineStyle.includes('color-mix'))) {
-          element.setAttribute('style', 
-            inlineStyle
-              .replace(/oklch\([^)]+\)/g, '#e4e4e7')
-              .replace(/color-mix\([^)]+\)/g, '#e4e4e7')
-          );
-        }
-
-        // Recursively apply to children
-        Array.from(element.children).forEach(child => {
-          applyFallbackStyles(child as HTMLElement);
-        });
-      };
-
-      applyFallbackStyles(clonedElement);
-
-      // Temporarily add cloned element to body
-      document.body.appendChild(clonedElement);
-
-      // Wait a moment for styles to apply
-      await new Promise(resolve => setTimeout(resolve, 150));
-
-      // Use html2canvas with enhanced options
-      const canvas = await html2canvas(clonedElement, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: clonedElement.offsetWidth,
-        height: clonedElement.offsetHeight,
-        ignoreElements: (element) => {
-          // Don't ignore status bar elements
-          if (element.textContent?.includes('9:41') || 
-              element.textContent?.includes('100%') || 
-              element.classList.contains('status-bar')) {
-            return false;
-          }
-          
-          // Ignore problematic elements
-          const classList = element.classList;
-          return classList.contains('group-hover:opacity-100') ||
-                 classList.contains('opacity-0') ||
-                 element.tagName === 'SCRIPT' ||
-                 element.tagName === 'STYLE' ||
-                 element.style.visibility === 'hidden';
-        },
-        onclone: (clonedDoc) => {
-          // Additional cleanup on the cloned document
-          const style = clonedDoc.createElement('style');
-          style.textContent = `
-            * { 
-              border-color: #e4e4e7 !important; 
-              color: #09090b !important;
-            }
-            /* Ensure status bar elements are visible */
-            .status-bar,
-            [class*="status"],
-            [class*="time"],
-            [class*="battery"],
-            [class*="signal"] {
-              visibility: visible !important;
-              opacity: 1 !important;
-              display: block !important;
-            }
-          `;
-          clonedDoc.head.appendChild(style);
-        },
-        logging: false
-      });
-
-      // Remove cloned element
-      document.body.removeChild(clonedElement);
-
-      // Convert canvas to image
-      const imgData = canvas.toDataURL('image/png', 1.0);
-
-      // Calculate dimensions to fit A4 page with margins
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const margin = 10; // 10mm margin
-      const availableWidth = pdfWidth - (margin * 2);
-      const availableHeight = pdfHeight - (margin * 2);
-      
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-
-      // Add new page if not the first step
-      if (i > 0) {
-        pdf.addPage();
-      }
-
-      // Add step name above the mobile wireframe
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      const stepNameText = `Step ${i + 1}: ${step.name}`;
-      const textWidth = pdf.getTextWidth(stepNameText);
-      const textX = (pdfWidth - textWidth) / 2;
-      const textY = 20;
-
-      pdf.text(stepNameText, textX, textY);
-
-      // Calculate image positioning
-      const imageY = textY + 10;
-      const availableHeightForImage = pdfHeight - imageY - 10;
-      const imageRatio = Math.min(availableWidth / (imgWidth / 2), availableHeightForImage / (imgHeight / 2));
-      const finalImgScaledWidth = (imgWidth / 2) * imageRatio;
-      const finalImgScaledHeight = (imgHeight / 2) * imageRatio;
-      const finalX = (pdfWidth - finalImgScaledWidth) / 2;
-      const finalY = imageY;
-
-      // Add image to PDF
-      pdf.addImage(imgData, 'PNG', finalX, finalY, finalImgScaledWidth, finalImgScaledHeight);
-
-      console.log(`✅ ===== STEP ${i + 1} added to PDF (${targetElement.id || targetElement.className}) =====\n`);
-    }
-
-    // Save the PDF
-    const fileName = `${currentCampaign.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_campaign.pdf`;
-    pdf.save(fileName);
-
-    console.log('🎉 PDF Export Complete!');
+    await exportCampaignToPDF(currentCampaign, setSelectedStepId);
+    
     toast.success('PDF exported successfully!', {
-      description: `Downloaded ${fileName}`,
+      description: `Downloaded ${currentCampaign.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_campaign.pdf`,
     });
-
   } catch (error) {
     console.error('❌ Failed to export PDF:', error);
     toast.error('Failed to export PDF', {
@@ -651,3 +417,5 @@ const handleExportToPDF = useCallback(async () => {
     </div>
   );
 }
+         
+      
