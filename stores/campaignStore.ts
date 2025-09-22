@@ -41,7 +41,7 @@ const defaultCampaigns: Campaign[] = [
         logic: [],
       },
     ],
-    lastModified: new Date('2023-10-26T10:00:00Z').toISOString(),
+    lastModified: new Date('2025-09-22T10:00:00Z').toISOString(),
     status: 'active',
   },
   {
@@ -63,7 +63,7 @@ const defaultCampaigns: Campaign[] = [
         logic: []
       }
     ],
-    lastModified: new Date('2023-10-27T11:30:00Z').toISOString(),
+    lastModified: new Date('2025-09-22T11:30:00Z').toISOString(),
     status: 'inactive',
   }
 ];
