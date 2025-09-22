@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
 import { Metadata } from 'next';
-import { ThemeProvider } from 'next-themes';
 
 
 import '@/styles/globals.css';
@@ -33,21 +32,12 @@ export default async function RootLayout({
           inter.className,
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          storageKey="nextjs-theme"
-          enableSystem
-          disableTransitionOnChange
-          enableColorScheme
-        >
-          <TooltipProvider delayDuration={0}>
-            
-              <Suspense>{children}</Suspense>
-            
-            <Toaster />
-          </TooltipProvider>
-        </ThemeProvider>       
+        <TooltipProvider delayDuration={0}>
+
+            <Suspense>{children}</Suspense>
+
+          <Toaster />
+        </TooltipProvider>
       </body>
     </html>
   );
