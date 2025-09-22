@@ -6,6 +6,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -127,6 +128,7 @@ const CanvasItem: React.FC<CanvasItemProps> = ({ item, index, questions, textSni
     opacity: isDragging ? 0.5 : 1,
     width: item.width ? `${item.width}px` : 'auto',
     height: item.height ? `${item.height}px` : 'auto',
+    touchAction: 'none',
   };
 
   const handleResizeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -223,13 +225,22 @@ const CanvasItem: React.FC<CanvasItemProps> = ({ item, index, questions, textSni
       className="relative my-2 bg-transparent border border-dashed border-transparent hover:border-blue-400 group cursor-move"
     >
       <button
-        onClick={() => {
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
           console.log('Button clicked for index', index);
           onRemoveContent(index);
         }}
-        onPointerDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onTouchStart={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         data-no-dnd="true"
-        className="absolute top-0 right-0 -m-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+        className="absolute top-0 right-0 -m-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-100 transition-opacity z-10"
         aria-label="Remove item"
       >
         <XIcon className="w-3 h-3" />
@@ -250,6 +261,7 @@ const CanvasItem: React.FC<CanvasItemProps> = ({ item, index, questions, textSni
 export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, textSnippets, buttons, onRemoveContent, onReorderContent, onResizeContent }) => {
   const sensors = useSensors(
     useSensor(PointerSensor),
+    useSensor(TouchSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
