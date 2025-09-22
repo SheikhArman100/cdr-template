@@ -420,9 +420,9 @@ export default function CreateCampaign() {
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-[calc(100vh-var(--header-height)-40px)] lg:h-[calc(100vh-var(--header-height)-40px)] shadow-sm rounded-lg lg:overflow-y-auto">
+    <div className="flex flex-col flex-1 h-full lg:h-[calc(100vh-var(--header-height)-40px)] shadow-sm rounded-lg lg:overflow-y-auto">
       {/* Consistent Header for All Devices */}
-      <header className="bg-card border-b border-border p-2 flex flex-col lg:flex-row items-start lg:items-center gap-3 justify-between z-30 shrink-0">
+      <header className="bg-card border-b border-border p-2 flex flex-col lg:flex-row items-start lg:items-center gap-3 justify-between shrink-0">
         <div className="flex items-center w-full ">
           <Button
             onClick={handleBackToList}

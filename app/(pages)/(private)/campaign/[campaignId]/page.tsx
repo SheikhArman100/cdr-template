@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ImageAsset, Question, QuestionType, TextSnippet, ButtonContent } from '@/types/campaign.types';
-import { ArrowLeftIcon, DocumentTextIcon, PencilIcon, CheckIcon, SaveIcon, RefreshCwIcon } from '@/components/icons';
+import { ArrowLeftIcon, DocumentTextIcon, PencilIcon, CheckIcon, SaveIcon, RefreshCwIcon, PanelLeftIcon, PanelRightIcon } from '@/components/icons';
 import { CampaignLeftPanel } from '@/components/CampaignLeftPanel';
 import { Canvas } from '@/components/Canvas';
 import { InspectorPanel } from '@/components/InspectorPanel';
@@ -12,6 +12,7 @@ import { useCampaignStore } from '@/stores/campaignStore';
 import { ScreenLoader } from '@/components/screen-loader';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -69,6 +70,10 @@ export default function CampaignDetail() {
   const [isExporting, setIsExporting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
+
+  // Mobile drawer states
+  const [showLeftDrawer, setShowLeftDrawer] = useState(false);
+  const [showRightDrawer, setShowRightDrawer] = useState(false);
 
   // Global assets (could also be moved to store if needed)
   const [imageAssets, setImageAssets] = useState<ImageAsset[]>(initialImageAssets);
@@ -338,37 +343,35 @@ const handleExportToPDF = useCallback(async () => {
   };
 
   return (
-    <div className="flex flex-col flex-1 h-[calc(100vh-var(--header-height)-40px)] ">
-      <header className="bg-card border-b border-border p-2 flex items-center justify-between z-30  shrink-0">
-        <div className="flex items-center">
+    <div className="flex flex-col flex-1 h-full lg:h-[calc(100vh-var(--header-height)-40px)] shadow-sm rounded-lg lg:overflow-y-auto">
+      {/* Consistent Header for All Devices */}
+      <header className="bg-card border-b border-border p-2 flex flex-col lg:flex-row items-start lg:items-center gap-3 justify-between shrink-0">
+        <div className="flex items-center w-full ">
           <Button
             onClick={handleBackToList}
             variant="ghost"
             size="sm"
             className="text-muted-foreground hover:text-primary"
           >
-            <ArrowLeftIcon className="w-5 h-5 mr-2" />
-           <span className='hidden lg:block'>Back to Campaigns</span> 
+            <ArrowLeftIcon className="w-5 h-5" />
+            <span className='hidden lg:block'>Back to Campaigns</span>
           </Button>
           <div className="w-px h-6 bg-border mx-2"></div>
-          <div>
+          <div className='w-full '>
             <EditableCampaignName name={currentCampaign.name} onNameChange={handleCampaignNameChange} />
             <p className="text-xs text-muted-foreground">Editing Campaign</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* Action Buttons */}
+        <div className=" w-full flex items-center justify-end gap-2">
           <Button
             onClick={handleSaveCampaign}
             disabled={isSaving}
             variant="primary"
             size="sm"
-            
           >
-            {isSaving ? (
-              <RefreshCwIcon className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <SaveIcon className="w-4 h-4 mr-2" />
-            )}
+            <SaveIcon className="w-4 h-4 mr-2" />
             {isSaving ? 'Saving...' : 'Save Campaign'}
           </Button>
           <Button
@@ -383,46 +386,139 @@ const handleExportToPDF = useCallback(async () => {
           </Button>
         </div>
       </header>
-      <main className="flex flex-1 min-h-0">
-        <CampaignLeftPanel
-          steps={currentCampaign.steps}
-          selectedStepId={selectedStepId}
-          onSelectStep={handleSelectStep}
-          onAddStep={addStep}
-          onDeleteStep={deleteStep}
-          onUpdateStepName={updateStepName}
-        />
-        <Canvas
-          step={selectedStep}
-          imageAssets={imageAssets}
-          questions={questions}
-          textSnippets={textSnippets}
-          buttons={buttons}
-          onRemoveContent={handleRemoveContent}
-          onReorderContent={handleReorderContent}
-          onResizeContent={handleResizeContent}
-        />
-        <InspectorPanel
-          selectedStep={selectedStep}
-          imageAssets={imageAssets}
-          questions={questions}
-          textSnippets={textSnippets}
-          buttons={buttons}
-          onStyleChange={handleStyleChange}
-          onAddContent={handleAddContent}
-          onSetBackground={handleSetBackground}
-          onAddImageAsset={handleAddImageAsset}
-          onRemoveImageAsset={handleRemoveImageAsset}
-          onAddQuestion={handleAddQuestion}
-          onUpdateQuestion={handleUpdateQuestion}
-          onDeleteQuestion={handleDeleteQuestion}
-          onAddTextSnippet={handleAddTextSnippet}
-          onUpdateTextSnippet={handleUpdateTextSnippet}
-          onDeleteTextSnippet={handleDeleteTextSnippet}
-          onAddButton={handleAddButton}
-          onUpdateButton={handleUpdateButton}
-          onDeleteButton={handleDeleteButton}
-        />
+
+      {/* Panel Toggle Buttons - Mobile Only */}
+      <div className="bg-muted/30 border-b border-border p-2 flex items-center justify-center gap-2 z-20 shrink-0 lg:hidden">
+        <Button
+          onClick={() => setShowLeftDrawer(!showLeftDrawer)}
+          variant="outline"
+          size="sm"
+          className="text-muted-foreground hover:text-primary"
+        >
+          <PanelLeftIcon className="w-4 h-4 mr-2" />
+          Steps
+        </Button>
+        <Button
+          onClick={() => setShowRightDrawer(!showRightDrawer)}
+          variant="outline"
+          size="sm"
+          className="text-muted-foreground hover:text-primary"
+        >
+          <PanelRightIcon className="w-4 h-4 mr-2" />
+          Inspector
+        </Button>
+      </div>
+
+      {/* Responsive Main Layout */}
+      <main className="flex flex-1 min-h-0 relative h-full">
+        {/* Mobile Layout with Drawers */}
+        <div className="flex flex-1 lg:hidden h-full">
+          {/* Left Drawer */}
+          <Sheet open={showLeftDrawer} onOpenChange={setShowLeftDrawer}>
+            <SheetContent side="left" className="w-64 p-0">
+              <SheetHeader className="sr-only">
+                <SheetTitle>Campaign Steps</SheetTitle>
+              </SheetHeader>
+              <CampaignLeftPanel
+                steps={currentCampaign.steps}
+                selectedStepId={selectedStepId}
+                onSelectStep={handleSelectStep}
+                onAddStep={addStep}
+                onDeleteStep={deleteStep}
+                onUpdateStepName={updateStepName}
+              />
+            </SheetContent>
+          </Sheet>
+
+          {/* Canvas - Full Width and Height on Mobile */}
+          <div className="flex-1 h-full overflow-hidden">
+            <div className="h-full w-full relative ">
+              <Canvas
+                step={selectedStep}
+                imageAssets={imageAssets}
+                questions={questions}
+                textSnippets={textSnippets}
+                buttons={buttons}
+                onRemoveContent={handleRemoveContent}
+                onReorderContent={handleReorderContent}
+                onResizeContent={handleResizeContent}
+              />
+            </div>
+          </div>
+
+          {/* Right Drawer */}
+          <Sheet open={showRightDrawer} onOpenChange={setShowRightDrawer}>
+            <SheetContent side="right" className="w-[90vw] sm:w-80 p-0">
+              <SheetHeader className="sr-only ">
+                <SheetTitle>Content Inspector</SheetTitle>
+              </SheetHeader>
+              <InspectorPanel
+                selectedStep={selectedStep}
+                imageAssets={imageAssets}
+                questions={questions}
+                textSnippets={textSnippets}
+                buttons={buttons}
+                onStyleChange={handleStyleChange}
+                onAddContent={handleAddContent}
+                onSetBackground={handleSetBackground}
+                onAddImageAsset={handleAddImageAsset}
+                onRemoveImageAsset={handleRemoveImageAsset}
+                onAddQuestion={handleAddQuestion}
+                onUpdateQuestion={handleUpdateQuestion}
+                onDeleteQuestion={handleDeleteQuestion}
+                onAddTextSnippet={handleAddTextSnippet}
+                onUpdateTextSnippet={handleUpdateTextSnippet}
+                onDeleteTextSnippet={handleDeleteTextSnippet}
+                onAddButton={handleAddButton}
+                onUpdateButton={handleUpdateButton}
+                onDeleteButton={handleDeleteButton}
+              />
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        {/* Desktop Layout - Original Three Panel */}
+        <div className="hidden lg:flex flex-1">
+          <CampaignLeftPanel
+            steps={currentCampaign.steps}
+            selectedStepId={selectedStepId}
+            onSelectStep={handleSelectStep}
+            onAddStep={addStep}
+            onDeleteStep={deleteStep}
+            onUpdateStepName={updateStepName}
+          />
+          <Canvas
+            step={selectedStep}
+            imageAssets={imageAssets}
+            questions={questions}
+            textSnippets={textSnippets}
+            buttons={buttons}
+            onRemoveContent={handleRemoveContent}
+            onReorderContent={handleReorderContent}
+            onResizeContent={handleResizeContent}
+          />
+          <InspectorPanel
+            selectedStep={selectedStep}
+            imageAssets={imageAssets}
+            questions={questions}
+            textSnippets={textSnippets}
+            buttons={buttons}
+            onStyleChange={handleStyleChange}
+            onAddContent={handleAddContent}
+            onSetBackground={handleSetBackground}
+            onAddImageAsset={handleAddImageAsset}
+            onRemoveImageAsset={handleRemoveImageAsset}
+            onAddQuestion={handleAddQuestion}
+            onUpdateQuestion={handleUpdateQuestion}
+            onDeleteQuestion={handleDeleteQuestion}
+            onAddTextSnippet={handleAddTextSnippet}
+            onUpdateTextSnippet={handleUpdateTextSnippet}
+            onDeleteTextSnippet={handleDeleteTextSnippet}
+            onAddButton={handleAddButton}
+            onUpdateButton={handleUpdateButton}
+            onDeleteButton={handleDeleteButton}
+          />
+        </div>
       </main>
     </div>
   );
