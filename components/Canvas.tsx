@@ -285,7 +285,7 @@ export const Canvas: React.FC<CanvasProps> = ({ step, imageAssets, questions, te
         <div className="w-full h-full bg-white rounded-[2rem] overflow-hidden relative ">
           {/* Status Bar */}
           <div className="h-6 bg-black text-white text-xs flex items-center justify-between px-4">
-            <span>9:41</span>
+            {/* <span>9:41</span> */}
             <div className="flex items-center space-x-1">
               <div className="w-4 h-2 bg-white rounded-sm"></div>
               <div className="w-4 h-2 bg-white rounded-sm"></div>
