@@ -80,24 +80,34 @@ export default function CampaignDetail() {
   useEffect(() => {
     if (campaign && (!currentCampaign || currentCampaign.id !== campaign.id)) {
       setCurrentCampaign(campaign);
-
-      // Load assets from campaign if available
-      if (campaign.imageAssets) {
-        setImageAssets(campaign.imageAssets);
-      }
-      if (campaign.questions) {
-        setQuestions(campaign.questions);
-      }
-      if (campaign.textSnippets) {
-        setTextSnippets(campaign.textSnippets);
-      }
-      if (campaign.buttons) {
-        setButtons(campaign.buttons);
-      }
-
       setSelectedStepId(campaign.steps[0]?.id || null);
     }
   }, [campaign, campaignId, currentCampaign?.id, setCurrentCampaign]);
+
+  // Sync assets from campaign data whenever they change
+  useEffect(() => {
+    if (campaign?.imageAssets) {
+      setImageAssets(campaign.imageAssets);
+    }
+  }, [campaign?.imageAssets]);
+
+  useEffect(() => {
+    if (campaign?.questions) {
+      setQuestions(campaign.questions);
+    }
+  }, [campaign?.questions]);
+
+  useEffect(() => {
+    if (campaign?.textSnippets) {
+      setTextSnippets(campaign.textSnippets);
+    }
+  }, [campaign?.textSnippets]);
+
+  useEffect(() => {
+    if (campaign?.buttons) {
+      setButtons(campaign.buttons);
+    }
+  }, [campaign?.buttons]);
 
   // No auto-save - only manual save via button
 
@@ -352,7 +362,7 @@ const handleExportToPDF = useCallback(async () => {
             disabled={isSaving}
             variant="primary"
             size="sm"
-            className="disabled:bg-muted"
+            
           >
             {isSaving ? (
               <RefreshCwIcon className="w-4 h-4 mr-2 animate-spin" />
@@ -417,5 +427,3 @@ const handleExportToPDF = useCallback(async () => {
     </div>
   );
 }
-         
-      

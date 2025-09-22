@@ -338,13 +338,13 @@ export const ImageLibrary: React.FC<ImageLibraryProps> = ({ imageAssets, onAddIm
       )}
 
       {/* Floating Add Button */}
-      <Button
+      {/* <Button
         onClick={openFileDialog}
         className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg z-10"
         size="lg"
       >
         <CloudUpload className="w-6 h-6" />
-      </Button>
+      </Button> */}
 
       {imageAssets.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
