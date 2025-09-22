@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import type { ImageAsset } from '../types/campaign.types';
+import React, { useState, useCallback, useEffect } from 'react';
+import type { ImageAsset, Step } from '../types/campaign.types';
 import { UploadIcon, XIcon } from './icons';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -11,18 +11,28 @@ import Image from 'next/image';
 
 interface ImageLibraryProps {
   imageAssets: ImageAsset[];
+  selectedStep?: Step | undefined;
   onAddImageAsset: (asset: ImageAsset) => void;
   onSelectImage: (assetId: string | null) => void;
   onRemoveImageAsset?: (assetId: string) => void;
 }
 
-export const ImageLibrary: React.FC<ImageLibraryProps> = ({ imageAssets, onAddImageAsset, onSelectImage, onRemoveImageAsset }) => {
+export const ImageLibrary: React.FC<ImageLibraryProps> = ({ imageAssets, selectedStep, onAddImageAsset, onSelectImage, onRemoveImageAsset }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState('');
   const [newImageName, setNewImageName] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
+
+  // Initialize selected image based on current step's background
+  useEffect(() => {
+    if (selectedStep?.backgroundAssetId) {
+      setSelectedImages(new Set([selectedStep.backgroundAssetId]));
+    } else {
+      setSelectedImages(new Set());
+    }
+  }, [selectedStep?.backgroundAssetId]);
 
   const validateFile = (file: File): string | null => {
     if (!file.type.startsWith('image/')) {

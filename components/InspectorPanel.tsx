@@ -33,6 +33,14 @@ interface InspectorPanelProps {
   onDeleteButton?: (buttonId: string) => void;
 }
 
+interface ImageLibraryProps {
+  imageAssets: ImageAsset[];
+  selectedStep?: Step | undefined;
+  onAddImageAsset: (asset: ImageAsset) => void;
+  onSelectImage: (assetId: string | null) => void;
+  onRemoveImageAsset?: (assetId: string) => void;
+}
+
 const StyleInspector: React.FC<{ style: ContentContainerStyle, onChange: (style: Partial<ContentContainerStyle>) => void }> = ({ style, onChange }) => {
     return (
         <div className="space-y-6">
@@ -163,7 +171,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = (props) => {
   const renderLibraryContent = () => {
     switch(activeLibraryTab) {
       case 'images':
-        return <ImageLibrary imageAssets={props.imageAssets} onAddImageAsset={onAddImageAsset} onSelectImage={onSetBackground} onRemoveImageAsset={onRemoveImageAsset} />;
+        return <ImageLibrary imageAssets={props.imageAssets} selectedStep={selectedStep} onAddImageAsset={onAddImageAsset} onSelectImage={onSetBackground} onRemoveImageAsset={onRemoveImageAsset} />;
       case 'questions':
         return <QuestionBank questions={props.questions} onAddQuestion={onAddQuestion} onUpdateQuestion={onUpdateQuestion} onDeleteQuestion={onDeleteQuestion} onAddToStep={(id:any) => onAddContent({ type: 'QUESTION', id })} />;
       case 'text':
