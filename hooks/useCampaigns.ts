@@ -52,8 +52,9 @@ export function useUpdateCampaign() {
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Campaign> }) =>
       campaignApi.updateCampaign(id, updates),
     onSuccess: (updatedCampaign) => {
-      // Update the campaigns list
+      // Update the campaigns list and force refetch
       queryClient.invalidateQueries({ queryKey: campaignKeys.all });
+      queryClient.refetchQueries({ queryKey: campaignKeys.all });
       // Update the specific campaign cache
       queryClient.setQueryData(
         campaignKeys.detail(updatedCampaign.id),
@@ -86,8 +87,9 @@ export function useUpdateCampaignStatus() {
     mutationFn: ({ id, status }: { id: string; status: 'active' | 'inactive' }) =>
       campaignApi.updateCampaignStatus(id, status),
     onSuccess: (updatedCampaign) => {
-      // Update the campaigns list
+      // Update the campaigns list and force refetch
       queryClient.invalidateQueries({ queryKey: campaignKeys.all });
+      queryClient.refetchQueries({ queryKey: campaignKeys.all });
       // Update the specific campaign cache
       queryClient.setQueryData(
         campaignKeys.detail(updatedCampaign.id),

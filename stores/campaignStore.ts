@@ -2,6 +2,132 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Campaign, Step, ContentItem, ContentContainerStyle } from '@/types/campaign.types';
 
+// Default campaigns that are available for everyone
+const defaultCampaigns: Campaign[] = [
+  {
+    id: 'campaign-1',
+    name: 'Welcome Journey',
+    userId: '123',
+    steps: [
+      {
+        id: 'step-1',
+        name: 'Welcome Screen',
+        backgroundAssetId: null,
+        contentContainerStyle: {
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          borderColor: '#000000',
+          borderWidth: 1,
+          textColor: '#000000',
+        },
+        contentItems: [
+          { type: 'TEXT_SNIPPET', id: 'ts-1', width: 280 },
+          { type: 'QUESTION', id: 'q-2', width: 280 }
+        ],
+        logic: [
+          { questionId: 'q-2', optionValue: 'Technology', nextStepId: 'step-2' }
+        ]
+      },
+      {
+        id: 'step-2',
+        name: 'Technology Path',
+        backgroundAssetId: 'img-1',
+        contentContainerStyle: {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          borderColor: '#ffffff',
+          borderWidth: 1,
+          textColor: '#ffffff',
+        },
+        contentItems: [],
+        logic: [],
+      },
+    ],
+    lastModified: new Date('2023-10-26T10:00:00Z').toISOString(),
+    status: 'active',
+  },
+  {
+    id: 'campaign-2',
+    name: 'New User Onboarding',
+    userId: '123',
+    steps: [
+      {
+        id: 'c2-step-1',
+        name: 'Get Started',
+        backgroundAssetId: null,
+        contentContainerStyle: {
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          borderColor: '#3b82f6',
+          borderWidth: 3,
+          textColor: '#1f2937',
+        },
+        contentItems: [{ type: 'TEXT_SNIPPET', id: 'ts-1', width: 280 }],
+        logic: []
+      }
+    ],
+    lastModified: new Date('2023-10-27T11:30:00Z').toISOString(),
+    status: 'inactive',
+  }
+];
+
+// Store for all campaign data with localStorage persistence
+interface CampaignsDataState {
+  campaigns: Campaign[];
+  initializeCampaigns: () => void;
+  getCampaigns: () => Campaign[];
+  getCampaign: (id: string) => Campaign | undefined;
+  addCampaign: (campaign: Campaign) => void;
+  updateCampaign: (id: string, updates: Partial<Campaign>) => void;
+  deleteCampaign: (id: string) => void;
+}
+
+export const useCampaignsDataStore = create<CampaignsDataState>()(
+  persist(
+    (set, get) => ({
+      campaigns: [],
+
+      initializeCampaigns: () => {
+        const currentCampaigns = get().campaigns;
+        if (currentCampaigns.length === 0) {
+          // Initialize with default campaigns if none exist
+          set({ campaigns: [...defaultCampaigns] });
+        }
+      },
+
+      getCampaigns: () => get().campaigns,
+
+      getCampaign: (id: string) => {
+        return get().campaigns.find(c => c.id === id);
+      },
+
+      addCampaign: (campaign: Campaign) => {
+        set((state) => ({
+          campaigns: [...state.campaigns, campaign]
+        }));
+      },
+
+      updateCampaign: (id: string, updates: Partial<Campaign>) => {
+        set((state) => ({
+          campaigns: state.campaigns.map(campaign =>
+            campaign.id === id
+              ? { ...campaign, ...updates, lastModified: new Date().toISOString() }
+              : campaign
+          )
+        }));
+      },
+
+      deleteCampaign: (id: string) => {
+        set((state) => ({
+          campaigns: state.campaigns.filter(campaign => campaign.id !== id)
+        }));
+      },
+    }),
+    {
+      name: 'campaigns-data-store',
+      // Persist everything
+      partialize: (state) => state,
+    }
+  )
+);
+
 interface CampaignState {
   // Current user
   currentUserId: string | null;

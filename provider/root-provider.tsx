@@ -1,8 +1,9 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
+import { useCampaignsDataStore } from '@/stores/campaignStore';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -19,9 +20,19 @@ const queryClient = new QueryClient({
   },
 });
 
+function CampaignInitializer() {
+  useEffect(() => {
+    // Initialize campaigns data store on app start
+    useCampaignsDataStore.getState().initializeCampaigns();
+  }, []);
+
+  return null;
+}
+
 export default function RootProvider({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
+      <CampaignInitializer />
       <Layout>{children}</Layout>
     </QueryClientProvider>
   );

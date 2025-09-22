@@ -84,7 +84,7 @@ export default function CampaignDetail() {
     }
   }, [campaign, campaignId, currentCampaign?.id, setCurrentCampaign]);
 
-  // Sync assets from campaign data whenever they change
+  // Sync assets from campaign data whenever they change (including after saves)
   useEffect(() => {
     if (campaign?.imageAssets) {
       setImageAssets(campaign.imageAssets);
