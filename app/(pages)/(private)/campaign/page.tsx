@@ -42,18 +42,19 @@ const CampaignListView: React.FC<{
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Campaigns</h1>
-                    <p className="text-muted-foreground">Manage your marketing campaigns</p>
+        <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+                <div className="space-y-1">
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Campaigns</h1>
+                    <p className="text-sm sm:text-base text-muted-foreground">Manage your marketing campaigns</p>
                 </div>
-                <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2 bg-muted p-1 rounded-lg">
+                <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
+                    <div className="flex items-center space-x-1 bg-muted p-1 rounded-lg self-start sm:self-auto">
                         <Button
                             variant={statusFilter === 'all' ? 'primary' : 'ghost'}
                             size="sm"
                             onClick={() => setStatusFilter('all')}
+                            className="text-xs sm:text-sm"
                         >
                             All
                         </Button>
@@ -61,6 +62,7 @@ const CampaignListView: React.FC<{
                             variant={statusFilter === 'active' ? 'primary' : 'ghost'}
                             size="sm"
                             onClick={() => setStatusFilter('active')}
+                            className="text-xs sm:text-sm"
                         >
                             Active
                         </Button>
@@ -68,89 +70,105 @@ const CampaignListView: React.FC<{
                             variant={statusFilter === 'inactive' ? 'primary' : 'ghost'}
                             size="sm"
                             onClick={() => setStatusFilter('inactive')}
+                            className="text-xs sm:text-sm"
                         >
                             Inactive
                         </Button>
                     </div>
-                    <Button onClick={onCreateCampaign}>
+                    <Button onClick={onCreateCampaign} className="w-full sm:w-auto">
                         <Plus className="w-4 h-4 mr-2" />
-                        Create New Campaign
+                        <span className="hidden sm:inline">Create New Campaign</span>
+                        <span className="sm:hidden">Create</span>
                     </Button>
                 </div>
             </div>
 
             <Card>
                 <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Campaign Name</TableHead>
-                                <TableHead>Steps</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Last Modified</TableHead>
-                                <TableHead className="w-[100px]">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredCampaigns.map(campaign => (
-                                <TableRow key={campaign.id} className="cursor-pointer hover:bg-muted/50">
-                                    <TableCell>
-                                        <Link
-                                            href={`/campaign/${campaign.id}`}
-                                            className="font-medium hover:underline"
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            {campaign.name}
-                                        </Link>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center space-x-2">
-                                            <FileText className="w-4 h-4" />
-                                            <span>{campaign.steps.length}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center space-x-2">
-                                            <StatusToggle campaign={campaign} />
-                                            <Badge variant={campaign.status === 'active' ? 'primary' : 'secondary'}>
-                                                {campaign.status === 'active' ? 'Active' : 'Inactive'}
-                                            </Badge>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                        {new Date(campaign.lastModified).toLocaleString()}
-                                    </TableCell>
-                                    <TableCell>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="ghost" size="sm">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Delete Campaign</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        Are you sure you want to delete "{campaign.name}"? This action cannot be undone.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction
-                                                        onClick={() => onDeleteCampaign(campaign.id)}
-                                                        disabled={isDeleting}
-                                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                                    >
-                                                        Delete
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </TableCell>
+                    <div className="w-full overflow-x-scroll">
+                        <Table className='w-full'>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="">Campaign Name</TableHead>
+                                    <TableHead className="">Steps</TableHead>
+                                    <TableHead className="">Status</TableHead>
+                                    <TableHead className=" hidden sm:table-cell">Last Modified</TableHead>
+                                    <TableHead className="">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody className=''>
+                                {filteredCampaigns.map(campaign => (
+                                    <TableRow key={campaign.id} className="cursor-pointer hover:bg-muted/50">
+                                        <TableCell className="font-medium">
+                                            <Link
+                                                href={`/campaign/${campaign.id}`}
+                                                className="hover:underline block truncate max-w-[200px] sm:max-w-none"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                {campaign.name}
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center space-x-2">
+                                                <FileText className="w-4 h-4 flex-shrink-0" />
+                                                <span className="text-sm">{campaign.steps.length}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                                                <StatusToggle campaign={campaign} />
+                                                <Badge
+                                                    variant={campaign.status === 'active' ? 'primary' : 'secondary'}
+                                                    className="text-xs w-fit"
+                                                >
+                                                    {campaign.status === 'active' ? 'Active' : 'Inactive'}
+                                                </Badge>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground text-sm hidden sm:table-cell">
+                                            <div className="text-xs sm:text-sm">
+                                                {new Date(campaign.lastModified).toLocaleDateString()}
+                                                <br className="hidden sm:block" />
+                                                <span className="sm:hidden"> </span>
+                                                {new Date(campaign.lastModified).toLocaleTimeString([], {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                                        <Trash2 className="w-4 h-4" />
+                                                        <span className="sr-only">Delete campaign</span>
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent className="sm:max-w-[425px]">
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Delete Campaign</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Are you sure you want to delete "{campaign.name}"? This action cannot be undone.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                                                        <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            onClick={() => onDeleteCampaign(campaign.id)}
+                                                            disabled={isDeleting}
+                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto"
+                                                        >
+                                                            Delete
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
         </div>
@@ -185,8 +203,15 @@ export default function CampaignList() {
 
     if (error) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-lg text-destructive">Error loading campaigns</div>
+            <div className="flex items-center justify-center min-h-[400px] px-4">
+                <div className="text-center">
+                    <div className="text-lg sm:text-xl text-destructive font-medium mb-2">
+                        Error loading campaigns
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                        Please try refreshing the page or contact support if the problem persists.
+                    </p>
+                </div>
             </div>
         );
     }
@@ -201,5 +226,6 @@ export default function CampaignList() {
             isDeleting={deleteCampaignMutation.isPending}
             isUpdating={updateStatusMutation.isPending}
         />
+        
     );
 }

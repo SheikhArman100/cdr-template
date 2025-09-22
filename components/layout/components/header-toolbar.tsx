@@ -43,18 +43,18 @@ export function HeaderToolbar() {
 
   return (
     <nav className="flex items-center gap-2.5">
-      <Button mode="icon" variant="outline"><Coffee /></Button>
-      <Button mode="icon" variant="outline"><MessageSquareCode /></Button>
+      {/* <Button mode="icon" variant="outline"><Coffee /></Button>
+      <Button mode="icon" variant="outline"><MessageSquareCode /></Button> */}
       <Button mode="icon" variant="outline"><Pin /></Button>
 
-      {!isMobile && (
+      {/* {!isMobile && (
         <InputWrapper className="w-full lg:w-40">
           <Search />
           <Input type="search" placeholder="Search" onChange={handleInputChange} />
         </InputWrapper>
-      )}
+      )} */}
 
-      {isMobile ? (
+      {/* {isMobile ? (
         <>
           <Button variant="outline" mode="icon"><ClipboardList /></Button>
           <Button variant="mono" mode="icon"><Plus /></Button>
@@ -64,7 +64,7 @@ export function HeaderToolbar() {
           <Button variant="outline"><ClipboardList /> Reports</Button>
           <Button variant="mono"><Plus /> Add</Button>
         </>
-      )}
+      )} */}
 
       {/* User Dropdown Menu */}
       <DropdownMenu>

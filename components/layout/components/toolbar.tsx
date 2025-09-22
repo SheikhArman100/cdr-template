@@ -35,36 +35,42 @@ function ToolbarBreadcrumbs() {
   const { getBreadcrumb } = useMenu(pathname);
   const items: MenuItem[] = getBreadcrumb(MENU_SIDEBAR_MAIN);
 
+  // Fallback breadcrumb for current page
   if (items.length === 0) {
-    return null;
+    const getPageTitle = () => {
+      if (pathname === '/campaign') return 'Dashboard';
+      if (pathname === '/') return 'Dashboard';
+      if (pathname === '/ivr') return 'Dashboard';
+      if (pathname === '/whatsapp') return 'Dashboard';
+      return 'Dashboard';
+    };
+
+    return (
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbPage>{getPageTitle()}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    );
   }
+
+  // Only show the last item in the breadcrumb path
+  const lastItem = items[items.length - 1];
 
   return (
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink asChild>
-            <Link href="#">Home</Link>
-          </BreadcrumbLink>
+          {lastItem?.path ? (
+            <BreadcrumbLink asChild>
+              <Link href={lastItem.path}>{lastItem.title}</Link>
+            </BreadcrumbLink>
+          ) : (
+            <BreadcrumbPage>{lastItem?.title || 'Page'}</BreadcrumbPage>
+          )}
         </BreadcrumbItem>
-        {items.map((item, index) => {
-          const isLast = index === items.length - 1;
-
-          return (
-            <Fragment key={index}>
-              {index !== items.length - 1 && <BreadcrumbSeparator className="text-xs text-muted-foreground">/</BreadcrumbSeparator>}
-              <BreadcrumbItem>
-                {!isLast ? (
-                  <BreadcrumbLink asChild>
-                    <Link href={item.path || '#'}>{item.title}</Link>
-                  </BreadcrumbLink>
-                ) : (
-                  <BreadcrumbPage>{item.title}</BreadcrumbPage>
-                )}
-              </BreadcrumbItem>              
-            </Fragment>
-          );
-        })}
       </BreadcrumbList>
     </Breadcrumb>
   );
