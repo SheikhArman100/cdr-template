@@ -43,13 +43,28 @@ export async function exportCampaignToPDF(
   for (let i = 0; i < campaign.steps.length; i++) {
     const step = campaign.steps[i];
 
+    console.log(`📄 Exporting step ${i + 1}: ${step.name}`);
+
     // Update the selected step to render the correct content
     setSelectedStepId(step.id);
 
     // Wait for React to update the UI and styles to apply
-    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log('⏳ Waiting for React to update...');
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     let targetElement = document.getElementById('campaign-canvas') as HTMLElement;
+    console.log('🎯 Initial element search:', targetElement ? 'Found' : 'Not found');
+
+    // Wait a bit more if element not found
+    let attempts = 0;
+    while (!targetElement && attempts < 5) {
+      console.log(`🔄 Retry attempt ${attempts + 1}/5`);
+      await new Promise(resolve => setTimeout(resolve, 200));
+      targetElement = document.getElementById('campaign-canvas') as HTMLElement;
+      attempts++;
+    }
+
+    console.log('✅ Final element result:', targetElement ? 'Found' : 'Not found');
     
     const alternativeSelectors = [
       '.phone-mockup',
@@ -129,26 +144,36 @@ export async function exportCampaignToPDF(
     document.body.appendChild(clonedElement);
     await new Promise(resolve => setTimeout(resolve, 150));
 
+    console.log('📸 HTML being converted to canvas:', clonedElement.outerHTML);
+
     const canvas = await html2canvas(clonedElement, {
-      scale: 2,
+      scale: 1.5,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
       width: clonedElement.offsetWidth,
       height: clonedElement.offsetHeight,
       ignoreElements: (element) => {
-        if (element.textContent?.includes('9:41') || 
-            element.textContent?.includes('100%') || 
-            element.classList.contains('status-bar')) {
+        const htmlElement = element as HTMLElement;
+        if (htmlElement.textContent?.includes('9:41') ||
+            htmlElement.textContent?.includes('100%') ||
+            htmlElement.classList.contains('status-bar')) {
           return false;
         }
-        
-        const classList = element.classList;
+
+        const classList = htmlElement.classList;
+        // Hide remove buttons and resize handles in PDF export
+        const isRemoveButton = htmlElement.tagName === 'BUTTON' &&
+                              htmlElement.getAttribute('aria-label') === 'Remove item';
+        const isResizeHandle = classList.contains('cursor-col-resize');
+
         return classList.contains('group-hover:opacity-100') ||
                classList.contains('opacity-0') ||
-               element.tagName === 'SCRIPT' ||
-               element.tagName === 'STYLE' ||
-               element.style.visibility === 'hidden';
+               htmlElement.tagName === 'SCRIPT' ||
+               htmlElement.tagName === 'STYLE' ||
+               htmlElement.style.visibility === 'hidden' ||
+               isRemoveButton ||
+               isResizeHandle;
       },
       onclone: (clonedDoc) => {
         const style = clonedDoc.createElement('style');
@@ -249,9 +274,9 @@ export async function exportCampaignToPDF(
 
     const imageY = textY + 10;
     const availableHeightForImage = pdfHeight - imageY - 10;
-    const imageRatio = Math.min(availableWidth / (imgWidth / 2), availableHeightForImage / (imgHeight / 2));
-    const finalImgScaledWidth = (imgWidth / 2) * imageRatio;
-    const finalImgScaledHeight = (imgHeight / 2) * imageRatio;
+    const imageRatio = Math.min(availableWidth / (imgWidth / 1.5), availableHeightForImage / (imgHeight / 1.5));
+    const finalImgScaledWidth = (imgWidth / 1.5) * imageRatio;
+    const finalImgScaledHeight = (imgHeight / 1.5) * imageRatio;
     const finalX = (pdfWidth - finalImgScaledWidth) / 2;
     const finalY = imageY;
 
