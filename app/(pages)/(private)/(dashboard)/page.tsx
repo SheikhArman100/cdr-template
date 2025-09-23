@@ -1,11 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import dynamic from 'next/dynamic';
 
 // Dynamically import ApexCharts to avoid SSR issues
@@ -42,7 +39,6 @@ const dashboardData = {
 };
 
 export default function Dashboard() {
-    const [activeTab, setActiveTab] = useState('overview');
 
     const barChartOptions = {
         chart: {
@@ -107,7 +103,7 @@ export default function Dashboard() {
         <div className="space-y-6">
             <Card>
                 <CardContent className="pt-6">
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
                         <div>
                             <label className="text-xs font-medium text-muted-foreground">Region</label>
                             <Select>
@@ -174,7 +170,7 @@ export default function Dashboard() {
                         <CardTitle>National Contact Data</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-3xl font-bold">{dashboardData.nationalData.contact.total.toLocaleString()}</p>
+                        <p className="text-2xl md:text-3xl font-bold">{dashboardData.nationalData.contact.total.toLocaleString()}</p>
                         <p className="text-sm text-green-600 font-semibold">{dashboardData.nationalData.contact.achievement}% Achievement</p>
                     </CardContent>
                 </Card>
@@ -183,13 +179,13 @@ export default function Dashboard() {
                         <CardTitle>National Trial Data</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-3xl font-bold">{dashboardData.nationalData.trial.total.toLocaleString()}</p>
+                        <p className="text-2xl md:text-3xl font-bold">{dashboardData.nationalData.trial.total.toLocaleString()}</p>
                         <p className="text-sm text-green-600 font-semibold">{dashboardData.nationalData.trial.achievement}% Achievement</p>
                     </CardContent>
                 </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                     <CardHeader>
                         <CardTitle>Target vs Achievement</CardTitle>
@@ -233,186 +229,18 @@ export default function Dashboard() {
         </div>
     );
 
-    const AnalyticsView = () => {
-        const [activeAnalyticsTab, setActiveAnalyticsTab] = useState('target');
 
-        const handleDownload = (dataType: 'target' | 'brand') => {
-            if (dataType === 'target') {
-                const headers = ['Metric', 'Target (%)', 'Achievement (%)'];
-                const targetData = [
-                    ['Contact', '100', '83.3'],
-                    ['Trial', '100', '85.0'],
-                ];
-                const csvContent = [headers.join(','), ...targetData.map(row => row.join(','))].join('\n');
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                if (link.download !== undefined) {
-                    const url = URL.createObjectURL(blob);
-                    link.setAttribute("href", url);
-                    link.setAttribute("download", 'target-vs-achievement-data.csv');
-                    link.style.visibility = 'hidden';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-            } else if (dataType === 'brand') {
-                const brandData = [
-                    ['Brand A', '450,000', '380,000'],
-                    ['Brand B', '350,000', '220,000'],
-                    ['Brand C', '250,000', '150,000'],
-                    ['Brand D', '200,000', '100,000'],
-                ];
-                const headers = ['Brand', 'User Contacts', 'User Trials'];
-                const csvContent = [headers.join(','), ...brandData.map(row => row.join(','))].join('\n');
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                if (link.download !== undefined) {
-                    const url = URL.createObjectURL(blob);
-                    link.setAttribute("href", url);
-                    link.setAttribute("download", 'brand-wise-data.csv');
-                    link.style.visibility = 'hidden';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-            }
-        };
 
-        const renderTargetTable = () => (
-            <Card>
-                <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <CardTitle>Target vs Achievement Data</CardTitle>
-                        <Button onClick={() => handleDownload('target')} size="sm">Download CSV</Button>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Metric</TableHead>
-                                <TableHead>Target (%)</TableHead>
-                                <TableHead>Achievement (%)</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow>
-                                <TableCell className="font-medium">Contact</TableCell>
-                                <TableCell>100</TableCell>
-                                <TableCell>83.3</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">Trial</TableCell>
-                                <TableCell>100</TableCell>
-                                <TableCell>85.0</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-        );
 
-        const renderBrandTable = () => (
-            <Card>
-                <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <CardTitle>Brand-wise Data</CardTitle>
-                        <Button onClick={() => handleDownload('brand')} size="sm">Download CSV</Button>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Brand</TableHead>
-                                <TableHead>User Contacts</TableHead>
-                                <TableHead>User Trials</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow>
-                                <TableCell className="font-medium">Brand A</TableCell>
-                                <TableCell>450,000</TableCell>
-                                <TableCell>380,000</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">Brand B</TableCell>
-                                <TableCell>350,000</TableCell>
-                                <TableCell>220,000</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">Brand C</TableCell>
-                                <TableCell>250,000</TableCell>
-                                <TableCell>150,000</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">Brand D</TableCell>
-                                <TableCell>200,000</TableCell>
-                                <TableCell>100,000</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-        );
-
-        return (
-            <div className="space-y-6">
-                <Tabs value={activeAnalyticsTab} onValueChange={setActiveAnalyticsTab}>
-                    <TabsList>
-                        <TabsTrigger value="target">Target vs Achievement</TabsTrigger>
-                        <TabsTrigger value="brand">Brand-wise Data</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="target" className="space-y-4">
-                        {renderTargetTable()}
-                    </TabsContent>
-                    <TabsContent value="brand" className="space-y-4">
-                        {renderBrandTable()}
-                    </TabsContent>
-                </Tabs>
-            </div>
-        );
-    };
-
-    const AIAssistant = () => {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>AI Assistant</CardTitle>
-                    <CardDescription>Ask questions about your campaign data</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="h-96 flex items-center justify-center text-muted-foreground">
-                        AI Assistant feature coming soon...
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    };
 
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-                <p className="text-muted-foreground">Monitor your campaign performance and analytics</p>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
+                <p className="text-sm md:text-base text-muted-foreground">Monitor your campaign performance and analytics</p>
             </div>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList>
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                    <TabsTrigger value="ai">AI Assistant</TabsTrigger>
-                </TabsList>
-                <TabsContent value="overview" className="space-y-4">
-                    {renderOverview()}
-                </TabsContent>
-                <TabsContent value="analytics" className="space-y-4">
-                    <AnalyticsView />
-                </TabsContent>
-                <TabsContent value="ai" className="space-y-4">
-                    <AIAssistant />
-                </TabsContent>
-            </Tabs>
+            {renderOverview()}
         </div>
     );
 }
