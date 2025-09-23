@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Section1 from '@/components/dashboard/section1/section1';
+import Section2 from '@/components/dashboard/section2/section2';
 
 // Dynamically import ApexCharts to avoid SSR issues
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
@@ -32,7 +33,7 @@ export default function Dashboard() {
         
           <div className="space-y-6">
             <Section1 />
-            {/* <Section2 /> */}
+            <Section2 />
             
           </div>
         
