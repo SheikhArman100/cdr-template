@@ -1,9 +1,10 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { useCampaignsDataStore } from '@/stores/campaignStore';
+import { ScreenLoader } from '@/components/screen-loader';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -30,6 +31,21 @@ function CampaignInitializer() {
 }
 
 export default function RootProvider({ children }: { children: ReactNode }) {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Prevent sidebar flash by showing loader initially
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000); // 1 second loading time
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <ScreenLoader title='Loading contents' />;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <CampaignInitializer />
