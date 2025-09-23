@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Check, ChevronsUpDown, Gem, Hexagon, Layers2, Menu, PanelRight, Zap } from 'lucide-react';
+import { Menu, PanelRight, Zap } from 'lucide-react';
 import { useLayout } from './context';
 import {
   Sheet,
@@ -12,52 +12,22 @@ import { Button } from '@/components/ui/button';
 import { SidebarPrimary } from './sidebar-primary';
 import { SidebarSecondary } from './sidebar-secondary';
 import { toAbsoluteUrl } from '@/lib/helpers';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-
-interface Team {
-  icon: React.ElementType;
-  name: string;
-  color: string;
-  members: number;
-}
 
 export function HeaderLogo() {
   const pathname = usePathname();
   const { isMobile, sidebarToggle } = useLayout();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  const teams: Team[] = [
-    {
-      icon: Zap,
-      name: "Thunder AI",
-      color: "bg-teal-600 text-white",
-      members: 8
-    },
-    {
-      icon: Gem,
-      name: "Clarity AI",
-      color: "bg-fuchsia-600 text-white",
-      members: 6
-    },
-    {
-      icon: Hexagon,
-      name: "Lightning AI",
-      color: "bg-yellow-600 text-white",
-      members: 12
-    },
-    {
-      icon: Layers2,
-      name: "Bold AI",
-      color: "bg-blue-600 text-white",
-      members: 4
-    }
-  ];
-
-  const [selectedTeam, setSelectedTeam] = useState<Team>(teams[0]);
+  // Single team configuration
+  const team = {
+    icon: Zap,
+    name: "CDR Dashboard",
+    color: "bg-teal-600 text-white"
+  };
 
   // Close sheet when route changes
   useEffect(() => {
@@ -112,42 +82,15 @@ export function HeaderLogo() {
 
         {/* Sidebar header */}
         <div className="flex w-full grow items-center justify-between px-5 gap-2.5">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="inline-flex text-muted-foreground hover:text-foreground px-1.5 -ms-1.5"
-              >
-                <div className={cn("size-6 flex items-center justify-center rounded-md", selectedTeam.color)}>
-                  <selectedTeam.icon className="size-4" />
-                </div>
-
-                <span className="text-mono text-sm font-medium hidden lg:block">
-                  {selectedTeam.name}
-                </span>
-                <ChevronsUpDown className="opacity-100" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="w-56"
-              side="bottom"
-              align="end"
-              sideOffset={10}
-              alignOffset={-80}
-            >
-              {teams.map((team) => (
-                <DropdownMenuItem key={team.name} onClick={() => setSelectedTeam(team)} data-active={selectedTeam.name === team.name}>
-                  <div className={cn("size-6 rounded-md flex items-center justify-center", team.color)}>
-                    <team.icon className="size-4" />
-                  </div>
-                  <span className="text-mono text-sm font-medium">{team.name}</span>
-                  {selectedTeam.name === team.name && (
-                    <Check className="ms-auto size-4 text-primary" />
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Single team display */}
+          <div className="inline-flex text-muted-foreground px-1.5 -ms-1.5">
+            <div className={cn("size-6 flex items-center justify-center rounded-md", team.color)}>
+              <team.icon className="size-4" />
+            </div>
+            <span className="text-mono text-sm font-medium hidden lg:block ml-2">
+              {team.name}
+            </span>
+          </div>
 
           {/* Sidebar toggle */}
           <Button
@@ -158,7 +101,7 @@ export function HeaderLogo() {
           >
             <PanelRight className="-rotate-180 in-data-[sidebar-open=false]:rotate-0 opacity-100" />
           </Button>
-        </div>        
+        </div>
       </div>
     </div>
   );
