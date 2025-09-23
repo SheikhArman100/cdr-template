@@ -32,9 +32,9 @@ export async function exportCampaignToPDF(
     throw new Error('No campaign or steps to export');
   }
 
-  // Create PDF document
+  // Create PDF document - use landscape for better mobile frame fit
   const pdf = new jsPDF({
-    orientation: 'portrait',
+    orientation: 'landscape',
     unit: 'mm',
     format: 'a4'
   });
@@ -95,13 +95,17 @@ export async function exportCampaignToPDF(
     const computedStyle = window.getComputedStyle(targetElement);
     const originalRect = targetElement.getBoundingClientRect();
     const clonedElement = targetElement.cloneNode(true) as HTMLElement;
-    
+
+    // Get dimensions before positioning off-screen, ensuring we capture any overflow from large borders
+    const elementWidth = Math.max(targetElement.offsetWidth || originalRect.width || 320, targetElement.scrollWidth || 320);
+    const elementHeight = Math.max(targetElement.offsetHeight || originalRect.height || 568, targetElement.scrollHeight || 568);
+
     clonedElement.style.cssText = `
       position: absolute !important;
       left: -9999px !important;
       top: -9999px !important;
-      width: ${originalRect.width}px !important;
-      height: ${originalRect.height}px !important;
+      width: ${elementWidth}px !important;
+      height: ${elementHeight}px !important;
       transform: none !important;
       background: ${computedStyle.backgroundColor || '#ffffff'} !important;
       overflow: visible !important;
@@ -113,12 +117,17 @@ export async function exportCampaignToPDF(
 
     const applyFallbackStyles = (element: HTMLElement) => {
       const originalStyle = window.getComputedStyle(element);
-      
-      element.style.borderColor = element.style.borderColor || '#e4e4e7';
-      element.style.color = element.style.color || '#09090b';
-      
-      if (element.textContent?.includes('9:41') || 
-          element.textContent?.includes('100%') || 
+
+      // Only apply fallback styles if element doesn't already have custom styles
+      if (!element.style.borderColor || element.style.borderColor === '') {
+        element.style.borderColor = '#e4e4e7';
+      }
+      if (!element.style.color || element.style.color === '') {
+        element.style.color = '#09090b';
+      }
+
+      if (element.textContent?.includes('9:41') ||
+          element.textContent?.includes('100%') ||
           element.classList.contains('status-bar') ||
           element.getAttribute('class')?.includes('status')) {
         element.style.visibility = 'visible';
@@ -128,7 +137,7 @@ export async function exportCampaignToPDF(
 
       const inlineStyle = element.getAttribute('style');
       if (inlineStyle && (inlineStyle.includes('oklch') || inlineStyle.includes('color-mix'))) {
-        element.setAttribute('style', 
+        element.setAttribute('style',
           inlineStyle
             .replace(/oklch\([^)]+\)/g, '#e4e4e7')
             .replace(/color-mix\([^)]+\)/g, '#e4e4e7')
@@ -147,7 +156,7 @@ export async function exportCampaignToPDF(
     console.log('📸 HTML being converted to canvas:', clonedElement.outerHTML);
 
     const canvas = await html2canvas(clonedElement, {
-      scale: 1.5,
+      scale: 2,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
@@ -178,10 +187,14 @@ export async function exportCampaignToPDF(
       onclone: (clonedDoc) => {
         const style = clonedDoc.createElement('style');
         style.textContent = `
-          * {
+          /* Only override elements without custom border colors */
+          *:not([style*="border-color"]) {
             border-color: #e4e4e7 !important;
+          }
+          *:not([style*="color"]) {
             color: #09090b !important;
           }
+
           .status-bar,
           [class*="status"],
           [class*="time"],
@@ -194,7 +207,15 @@ export async function exportCampaignToPDF(
 
           /* Override all component colors for PDF export */
           [data-radix-calendar],
-          [data-radix-calendar] *,
+          [data-radix-calendar] * {
+            border-color: #e4e4e7 !important;
+            background-color: #ffffff !important;
+            color: #09090b !important;
+            fill: #09090b !important;
+            stroke: #e4e4e7 !important;
+            outline: none !important;
+            box-shadow: none !important;
+          }
           [data-slot="datefield"],
           [data-slot="datefield"] *,
           [data-slot="input"],
@@ -274,9 +295,9 @@ export async function exportCampaignToPDF(
 
     const imageY = textY + 10;
     const availableHeightForImage = pdfHeight - imageY - 10;
-    const imageRatio = Math.min(availableWidth / (imgWidth / 1.5), availableHeightForImage / (imgHeight / 1.5));
-    const finalImgScaledWidth = (imgWidth / 1.5) * imageRatio;
-    const finalImgScaledHeight = (imgHeight / 1.5) * imageRatio;
+    const imageRatio = Math.min(availableWidth / (imgWidth / 2), availableHeightForImage / (imgHeight / 2));
+    const finalImgScaledWidth = (imgWidth / 2) * imageRatio;
+    const finalImgScaledHeight = (imgHeight / 2) * imageRatio;
     const finalX = (pdfWidth - finalImgScaledWidth) / 2;
     const finalY = imageY;
 
