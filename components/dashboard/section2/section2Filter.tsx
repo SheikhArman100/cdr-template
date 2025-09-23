@@ -7,7 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, RotateCcw } from 'lucide-react';
 
 interface FilterOption {
   value: string;
@@ -36,12 +37,15 @@ const Section2Filter: React.FC<Section2FilterProps> = ({ onFilterChange }) => {
 
   const handleCampaignChange = (value: string) => {
     setSelectedCampaign(value);
+  };
+
+  const handleFind = () => {
     onFilterChange({
-      campaign: value ? { value, label: value } : null,
+      campaign: selectedCampaign ? { value: selectedCampaign, label: selectedCampaign } : null,
     });
   };
 
-  const handleCampaignClear = () => {
+  const handleReset = () => {
     setSelectedCampaign('');
     onFilterChange({
       campaign: null,
@@ -49,23 +53,11 @@ const Section2Filter: React.FC<Section2FilterProps> = ({ onFilterChange }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div className="relative">
-        <Select value={selectedCampaign} onValueChange={handleCampaignChange}>
-          <SelectTrigger className="w-full">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Select value={selectedCampaign} onValueChange={handleCampaignChange} >
+          <SelectTrigger className="w-full max-w-xs">
             <SelectValue placeholder="Select Campaign" />
-            {selectedCampaign && (
-              <button
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleCampaignClear();
-                }}
-                className="absolute right-8 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-sm z-10"
-              >
-                <X className="h-3 w-3 text-gray-500" />
-              </button>
-            )}
           </SelectTrigger>
           <SelectContent>
             {campaignOptions.map(option => (
@@ -75,7 +67,20 @@ const Section2Filter: React.FC<Section2FilterProps> = ({ onFilterChange }) => {
             ))}
           </SelectContent>
         </Select>
+       <div className='flex items-center justify-between gap-2'>
+         <Button onClick={handleFind} variant="primary" size="md" className="w-full md:py-2 md:px-6 xl:px-12">
+          <Search className="w-5 h-5 mr-2" />
+          Find
+        </Button>
+        <Button onClick={handleReset} variant="outline" size="md" className="w-full md:py-2 md:px-6 xl:px-12">
+          <RotateCcw className="w-5 h-5 mr-2" />
+          Reset
+        </Button>
+       </div>
       </div>
+
+      {/* Mobile: Flex with gap, Desktop: flex row */}
+     
     </div>
   );
 };

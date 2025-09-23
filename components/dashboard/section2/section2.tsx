@@ -1,10 +1,11 @@
 
 "use client";
 import React, { useState, useEffect } from 'react';
-import Section2Filter from './Section2Filter';
-import Section2Metrics from './Section2Metrics';
+
 import RegionWiseAchievement from './RegionWiseAchievement';
 import { chartData } from '../../../data/chartData';
+import Section2Filter from './section2Filter';
+import Section2Metrics from './Section2Metrics';
 
 interface FilterOption {
   value: string;

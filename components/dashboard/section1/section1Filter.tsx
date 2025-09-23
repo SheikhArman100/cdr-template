@@ -7,6 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Search, RotateCcw } from 'lucide-react';
 
 interface FilterOption {
   value: string;
@@ -65,13 +67,78 @@ const Section1Filter: React.FC<Section1FilterProps> = ({ onFilterChange }) => {
 
   const handleCampaignChange = (value: string) => {
     setSelectedCampaign(value);
+    // Reset dependent filters when campaign changes
+    if (value !== selectedCampaign) {
+      setSelectedRegion('');
+      setSelectedArea('');
+      setSelectedDistributionHouse('');
+      setSelectedTerritory('');
+      setSelectedPoint('');
+    }
+  };
+
+  const handleRegionChange = (value: string) => {
+    setSelectedRegion(value);
+    // Reset dependent filters when region changes
+    if (value !== selectedRegion) {
+      setSelectedArea('');
+      setSelectedDistributionHouse('');
+      setSelectedTerritory('');
+      setSelectedPoint('');
+    }
+  };
+
+  const handleAreaChange = (value: string) => {
+    setSelectedArea(value);
+    // Reset dependent filters when area changes
+    if (value !== selectedArea) {
+      setSelectedDistributionHouse('');
+      setSelectedTerritory('');
+      setSelectedPoint('');
+    }
+  };
+
+  const handleDistributionHouseChange = (value: string) => {
+    setSelectedDistributionHouse(value);
+    // Reset dependent filters when distribution house changes
+    if (value !== selectedDistributionHouse) {
+      setSelectedTerritory('');
+      setSelectedPoint('');
+    }
+  };
+
+  const handleTerritoryChange = (value: string) => {
+    setSelectedTerritory(value);
+    // Reset dependent filters when territory changes
+    if (value !== selectedTerritory) {
+      setSelectedPoint('');
+    }
+  };
+
+  const handlePointChange = (value: string) => {
+    setSelectedPoint(value);
+  };
+
+  const handleFind = () => {
+    onFilterChange({
+      campaign: selectedCampaign ? { value: selectedCampaign, label: selectedCampaign } : null,
+      region: selectedRegion ? { value: selectedRegion, label: selectedRegion } : null,
+      area: selectedArea ? { value: selectedArea, label: selectedArea } : null,
+      distributionHouse: selectedDistributionHouse ? { value: selectedDistributionHouse, label: selectedDistributionHouse } : null,
+      territory: selectedTerritory ? { value: selectedTerritory, label: selectedTerritory } : null,
+      point: selectedPoint ? { value: selectedPoint, label: selectedPoint } : null,
+    });
+  };
+
+  const handleReset = () => {
+    setSelectedCampaign('');
     setSelectedRegion('');
     setSelectedArea('');
     setSelectedDistributionHouse('');
     setSelectedTerritory('');
     setSelectedPoint('');
     onFilterChange({
-      campaign: value ? { value, label: value } : null,
+      campaign: null,
       region: null,
       area: null,
       distributionHouse: null,
@@ -80,171 +147,115 @@ const Section1Filter: React.FC<Section1FilterProps> = ({ onFilterChange }) => {
     });
   };
 
-  const handleRegionChange = (value: string) => {
-    setSelectedRegion(value);
-    setSelectedArea('');
-    setSelectedDistributionHouse('');
-    setSelectedTerritory('');
-    setSelectedPoint('');
-    onFilterChange({
-      campaign: selectedCampaign ? { value: selectedCampaign, label: selectedCampaign } : null,
-      region: value ? { value, label: value } : null,
-      area: null,
-      distributionHouse: null,
-      territory: null,
-      point: null,
-    });
-  };
-
-  const handleAreaChange = (value: string) => {
-    setSelectedArea(value);
-    setSelectedDistributionHouse('');
-    setSelectedTerritory('');
-    setSelectedPoint('');
-    onFilterChange({
-      campaign: selectedCampaign ? { value: selectedCampaign, label: selectedCampaign } : null,
-      region: selectedRegion ? { value: selectedRegion, label: selectedRegion } : null,
-      area: value ? { value, label: value } : null,
-      distributionHouse: null,
-      territory: null,
-      point: null,
-    });
-  };
-
-  const handleDistributionHouseChange = (value: string) => {
-    setSelectedDistributionHouse(value);
-    setSelectedTerritory('');
-    setSelectedPoint('');
-    onFilterChange({
-      campaign: selectedCampaign ? { value: selectedCampaign, label: selectedCampaign } : null,
-      region: selectedRegion ? { value: selectedRegion, label: selectedRegion } : null,
-      area: selectedArea ? { value: selectedArea, label: selectedArea } : null,
-      distributionHouse: value ? { value, label: value } : null,
-      territory: null,
-      point: null,
-    });
-  };
-
-  const handleTerritoryChange = (value: string) => {
-    setSelectedTerritory(value);
-    setSelectedPoint('');
-    onFilterChange({
-      campaign: selectedCampaign ? { value: selectedCampaign, label: selectedCampaign } : null,
-      region: selectedRegion ? { value: selectedRegion, label: selectedRegion } : null,
-      area: selectedArea ? { value: selectedArea, label: selectedArea } : null,
-      distributionHouse: selectedDistributionHouse ? { value: selectedDistributionHouse, label: selectedDistributionHouse } : null,
-      territory: value ? { value, label: value } : null,
-      point: null,
-    });
-  };
-
-  const handlePointChange = (value: string) => {
-    setSelectedPoint(value);
-    onFilterChange({
-      campaign: selectedCampaign ? { value: selectedCampaign, label: selectedCampaign } : null,
-      region: selectedRegion ? { value: selectedRegion, label: selectedRegion } : null,
-      area: selectedArea ? { value: selectedArea, label: selectedArea } : null,
-      distributionHouse: selectedDistributionHouse ? { value: selectedDistributionHouse, label: selectedDistributionHouse } : null,
-      territory: selectedTerritory ? { value: selectedTerritory, label: selectedTerritory } : null,
-      point: value ? { value, label: value } : null,
-    });
-  };
-
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-      <Select value={selectedCampaign} onValueChange={handleCampaignChange}>
-        <SelectTrigger>
-          <SelectValue placeholder="Select Campaign" />
-        </SelectTrigger>
-        <SelectContent>
-          {campaignOptions.map(option => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <Select value={selectedCampaign} onValueChange={handleCampaignChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select Campaign" />
+          </SelectTrigger>
+          <SelectContent>
+            {campaignOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      <Select value={selectedRegion} onValueChange={handleRegionChange}>
-        <SelectTrigger>
-          <SelectValue placeholder="Select Region" />
-        </SelectTrigger>
-        <SelectContent>
-          {regionOptions.map(option => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <Select value={selectedRegion} onValueChange={handleRegionChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select Region" />
+          </SelectTrigger>
+          <SelectContent>
+            {regionOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      <Select
-        value={selectedArea}
-        onValueChange={handleAreaChange}
-        disabled={!selectedRegion}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Area" />
-        </SelectTrigger>
-        <SelectContent>
-          {areaOptions.map(option => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <Select
+          value={selectedArea}
+          onValueChange={handleAreaChange}
+          disabled={!selectedRegion}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Area" />
+          </SelectTrigger>
+          <SelectContent>
+            {areaOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      <Select
-        value={selectedDistributionHouse}
-        onValueChange={handleDistributionHouseChange}
-        disabled={!selectedArea}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Distribution House" />
-        </SelectTrigger>
-        <SelectContent>
-          {distributionHouseOptions.map(option => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <Select
+          value={selectedDistributionHouse}
+          onValueChange={handleDistributionHouseChange}
+          disabled={!selectedArea}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Distribution House" />
+          </SelectTrigger>
+          <SelectContent>
+            {distributionHouseOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      <Select
-        value={selectedTerritory}
-        onValueChange={handleTerritoryChange}
-        disabled={!selectedDistributionHouse}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Territory" />
-        </SelectTrigger>
-        <SelectContent>
-          {territoryOptions.map(option => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <Select
+          value={selectedTerritory}
+          onValueChange={handleTerritoryChange}
+          disabled={!selectedDistributionHouse}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Territory" />
+          </SelectTrigger>
+          <SelectContent>
+            {territoryOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      <Select
-        value={selectedPoint}
-        onValueChange={handlePointChange}
-        disabled={!selectedTerritory}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Point" />
-        </SelectTrigger>
-        <SelectContent>
-          {pointOptions.map(option => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <Select
+          value={selectedPoint}
+          onValueChange={handlePointChange}
+          disabled={!selectedTerritory}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Point" />
+          </SelectTrigger>
+          <SelectContent>
+            {pointOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Mobile: 2-column grid for buttons, Desktop: flex row */}
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end sm:gap-2 mb-2">
+        <Button onClick={handleFind} variant="primary" size="md" className="w-full sm:w-auto md:py-2 md:px-6 xl:px-12">
+          <Search className="w-5 h-5 mr-2" />
+          Find
+        </Button>
+        <Button onClick={handleReset} variant="outline" size="md" className="w-full sm:w-auto md:py-2 md:px-6 xl:px-12">
+          <RotateCcw className="w-5 h-5 mr-2" />
+          Reset
+        </Button>
+      </div>
     </div>
   );
 };
